@@ -15,3 +15,14 @@ Progress is saved in the student's own browser (localStorage plus a cookie backu
 - Custom claims can be shared with students using the share code in the editor.
 
 The whole game is one file, `index.html`, with no build step or dependencies.
+
+## Review section
+Menu → **Review the basics** is a 13-page review built from the B1.4 Levers pre-reading
+(what a lever is, parts, moment of force, effort/load arms, mechanical advantage with an
+interactive demo, the three classes with anatomical figures, the arm as a lever,
+external levers) and ends with a 7-question self-check. It is offered automatically
+the first time a student creates their lawyer.
+
+The textbook figures used in the review are in `img/`. If you do not have permission
+to publish them, delete the files in `img/`; the pages still work (the diagrams drawn
+in the game remain, the textbook pictures are simply hidden).

@@ -71,6 +71,19 @@ table.dec td:first-child,table.dec th:first-child{text-align:left}
 .h-r{background:#8a2a33}.h-a{background:#8a6a1e}.h-g{background:#1f7a62}
 .cli{display:flex;align-items:center;gap:8px;background:#2a344c;border-radius:10px;padding:6px 10px;margin-bottom:6px;font-size:14px}
 .cli span{flex:1}
+.paper{background:#fff;border-radius:12px;padding:8px;display:flex;align-items:center;justify-content:center;margin:6px 0}
+.paper img{max-width:100%;height:auto;max-height:240px;display:block}
+.fig{text-align:center;font-size:12.5px;color:var(--mute);margin-bottom:6px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:640px){.g2,.g3{grid-template-columns:1fr}}
+.rtag{display:inline-block;border-radius:999px;padding:1px 10px;font-weight:700;font-size:13px;color:#fff}
+.tF{background:#4a6fa8}.tE{background:#cf4a4a}.tL{background:#d9a622;color:#2a1d00}
+.call{background:#2a344c;border-left:4px solid var(--gold);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:14.5px;line-height:1.45}
+.formula{font-size:17px;font-weight:700;color:var(--gold);text-align:center;margin:6px 0}
+.dots{display:flex;gap:5px;margin:2px 0 8px;flex-wrap:wrap}.dots i{width:8px;height:8px;border-radius:50%;background:#46526e}.dots i.on{background:var(--gold)}
+table.mt th,table.mt td{border:1px solid #ffffff22;padding:6px 8px;font-size:14px;text-align:left;vertical-align:top}
+.sl{margin:6px 0;font-size:14px}.sl input{width:100%}
+button.btn.opt{display:block;width:100%;text-align:left;margin:6px 0}
 dl{margin:0}dt{font-weight:700;color:var(--gold);margin-top:8px}dd{margin:2px 0 0;font-size:14.5px;line-height:1.4}
 </style>
 </head>
@@ -203,12 +216,12 @@ const RANKS=[[0,'Law Student'],[100,'Junior Associate'],[300,'Attorney'],[700,'S
 /* ================= save (localStorage + cookie backup) ================= */
 const KEY='leverLawyerSave_v1';
 const DEF=()=>({created:false,look:{skin:2,hair:1,hairCol:1,eyes:0,brows:1,nose:0,mouth:0},suit:'drab',mat:'wood',
-  ownS:['drab'],ownM:['wood'],rep:0,fame:0,level:1,best:0,stats:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},quiz:{ok:0,bad:0},recall:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},name:'',custom:[],muted:false});
+  ownS:['drab'],ownM:['wood'],rep:0,fame:0,level:1,best:0,stats:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},quiz:{ok:0,bad:0},review:{ok:0,bad:0,paid:false},recall:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},name:'',custom:[],muted:false});
 let S=DEF();
 function load(){let s=null;
   try{s=localStorage.getItem(KEY)}catch(e){}
   if(!s){try{const m=document.cookie.match(new RegExp('(?:^|; )'+KEY+'=([^;]*)'));if(m)s=decodeURIComponent(m[1])}catch(e){}}
-  if(s){try{const o=JSON.parse(s);const d=DEF();S=Object.assign(d,o);S.look=Object.assign(d.look,o.look||{});S.stats=Object.assign(d.stats,o.stats||{});S.recall=Object.assign(d.recall,o.recall||{});if(!Array.isArray(S.custom))S.custom=[]}catch(e){S=DEF()}}rebuildClaims()}
+  if(s){try{const o=JSON.parse(s);const d=DEF();S=Object.assign(d,o);S.look=Object.assign(d.look,o.look||{});S.stats=Object.assign(d.stats,o.stats||{});S.recall=Object.assign(d.recall,o.recall||{});S.review=Object.assign(d.review,o.review||{});if(!Array.isArray(S.custom))S.custom=[]}catch(e){S=DEF()}}rebuildClaims()}
 function save(){const s=JSON.stringify(S);
   try{localStorage.setItem(KEY,s)}catch(e){}
   try{document.cookie=KEY+'='+encodeURIComponent(s)+';max-age=31536000;path=/;SameSite=Lax'}catch(e){}}
@@ -797,6 +810,7 @@ function openMenu(){
   const m=card.querySelector('.menuBtns');
   if(inTrial)m.appendChild(btn('▶ Resume trial','primary',closeModal));
   m.appendChild(btn(inTrial?'↺ Restart this trial':'▶ Start Trial '+S.level,inTrial?'':'primary',()=>startTrial(inTrial?G.opts:null)));
+  m.appendChild(btn('📚 Review the basics (levers)','',()=>openReview(false)));
   m.appendChild(btn('🎨 Customize lawyer & shop','',()=>openCustomize(false)));
   m.appendChild(btn('📁 Case file (progress)','',openStats));
   if(S.custom.length)m.appendChild(btn('📝 Practice my teacher\'s custom claims ('+S.custom.length+')','',startCustom));
@@ -884,7 +898,7 @@ function openCustomize(first){
   }
   function floaterModal(el,t){const s=document.createElement('div');s.className='sub';s.style.color='#ff9b9b';s.textContent=t;el.appendChild(s);setTimeout(()=>s.remove(),1600)}
   const row=card.querySelector('.row');
-  row.appendChild(btn(first?'✔ Done: to court!':'Back','primary',()=>{S.created=true;save();hud();closeModal();if(first)openMenu();else openMenu()}));
+  row.appendChild(btn(first?'✔ Done: next, a quick review':'Back','primary',()=>{S.created=true;save();hud();closeModal();hud();if(first)openReview(true);else openMenu()}));
   if(first)row.appendChild(btn('🎲 Randomize','',()=>{S.look=randLook();save();render()}));
   render();
 }
@@ -900,7 +914,7 @@ function copyText(ta,msg){const done=()=>{if(msg)msg.textContent='Copied ✔'};t
   else{try{document.execCommand('copy')}catch(e){}done()}}
 function makeCode(){
   const a=k=>[S.stats[k].ok,S.stats[k].bad],r=k=>[S.recall[k].ok,S.recall[k].bad];
-  const o={n:S.name||'(no name)',rep:S.rep,b:S.best,rk:rankOf(),t:[a(1),a(2),a(3)],rc:[r(1),r(2),r(3)],q:[S.quiz.ok,S.quiz.bad],d:new Date().toISOString().slice(0,10)};
+  const o={n:S.name||'(no name)',rep:S.rep,b:S.best,rk:rankOf(),t:[a(1),a(2),a(3)],rc:[r(1),r(2),r(3)],q:[S.quiz.ok,S.quiz.bad],rv:[S.review.ok,S.review.bad],d:new Date().toISOString().slice(0,10)};
   const j=JSON.stringify(o);return 'LL1.'+b64e(j)+'.'+chk(j)}
 function openSubmit(){
   const card=openModal('<h2>📤 Submit results</h2><p>Enter your name, copy your code, then paste it where your teacher tells you (for example a class form).</p><div class="grp"><label>Your name</label><input id="nm2" class="txt" maxlength="30"></div><div class="grp"><label>Your code</label><textarea id="code" class="txt" rows="4" readonly></textarea></div><p class="sub" id="cmsg">The code holds your name, trial reached and accuracy by lever class. It does not contain anything else.</p><div class="row"></div>');
@@ -925,12 +939,12 @@ function openDecode(){
   function run(){
     const ms=[...ta.value.matchAll(/LL1\.([A-Za-z0-9_-]+)\.([0-9a-z]{4})/g)];
     if(!ms.length){out.innerHTML='<p class="sub">No codes found.</p>';csv='';return}
-    let h='<table class="st dec"><tr><th>Name</th><th>Rank</th><th>Rep</th><th>Best trial</th><th>Recall 1st</th><th>Recall 2nd</th><th>Recall 3rd</th><th>See-saw 1st</th><th>See-saw 2nd</th><th>See-saw 3rd</th><th>Expert Qs</th><th>Date</th></tr>';
-    const lines=[['Name','Rank','Rep','Best trial','Recall 1st %','Recall 2nd %','Recall 3rd %','Seesaw 1st %','Seesaw 2nd %','Seesaw 3rd %','Expert Qs %','Date']];
+    let h='<table class="st dec"><tr><th>Name</th><th>Rank</th><th>Rep</th><th>Best trial</th><th>Recall 1st</th><th>Recall 2nd</th><th>Recall 3rd</th><th>See-saw 1st</th><th>See-saw 2nd</th><th>See-saw 3rd</th><th>Expert Qs</th><th>Review quiz</th><th>Date</th></tr>';
+    const lines=[['Name','Rank','Rep','Best trial','Recall 1st %','Recall 2nd %','Recall 3rd %','Seesaw 1st %','Seesaw 2nd %','Seesaw 3rd %','Expert Qs %','Review quiz %','Date']];
     for(const m of ms){let o=null;try{const j=b64d(m[1]);if(chk(j)===m[2])o=JSON.parse(j)}catch(e){}
-      if(!o){h+='<tr><td colspan="12">⚠ Invalid or altered code: '+esc(m[0].slice(0,24))+'…</td></tr>';continue}
-      h+='<tr><td>'+esc(o.n)+'</td><td>'+esc(o.rk)+'</td><td>'+o.rep+'</td><td>'+o.b+'</td>'+o.rc.map(cell).join('')+o.t.map(cell).join('')+cell(o.q)+'<td>'+esc(o.d)+'</td></tr>';
-      lines.push([o.n,o.rk,o.rep,o.b].concat(o.rc.map(pct),o.t.map(pct),[pct(o.q),o.d]).map(v=>'"'+String(v===null?'':v).replace(/"/g,'""')+'"'));
+      if(!o){h+='<tr><td colspan="13">⚠ Invalid or altered code: '+esc(m[0].slice(0,24))+'…</td></tr>';continue}
+      h+='<tr><td>'+esc(o.n)+'</td><td>'+esc(o.rk)+'</td><td>'+o.rep+'</td><td>'+o.b+'</td>'+o.rc.map(cell).join('')+o.t.map(cell).join('')+cell(o.q)+cell(o.rv||[0,0])+'<td>'+esc(o.d)+'</td></tr>';
+      lines.push([o.n,o.rk,o.rep,o.b].concat(o.rc.map(pct),o.t.map(pct),[pct(o.q),pct(o.rv||[0,0]),o.d]).map(v=>'"'+String(v===null?'':v).replace(/"/g,'""')+'"'));
     }
     out.innerHTML=h+'</table><p class="sub">Red below 60%, amber 60–79%, green 80% and above. Codes are checksummed but this is a review tool, not a secure exam.</p>';
     csv=lines.map(l=>l.join(',')).join('\n')}
@@ -980,6 +994,75 @@ function openCustom(){
   const back=document.createElement('div');back.className='row';back.appendChild(btn('Back','primary',openTeacher));card.appendChild(back);
   render();
 }
+
+/* ================= review lessons (from the B1.4 pre-reading) ================= */
+const tag=(k,t)=>'<span class="rtag t'+k+'">'+t+'</span>';
+const arr=(x,y1,y2,col)=>{const d=y2>y1?1:-1;return '<line x1="'+x+'" y1="'+y1+'" x2="'+x+'" y2="'+(y2-d*9)+'" stroke="'+col+'" stroke-width="5" stroke-linecap="round"/><polygon points="'+(x-9)+','+(y2-d*14)+' '+(x+9)+','+(y2-d*14)+' '+x+','+y2+'" fill="'+col+'"/>'};
+const stx=(x,y,t,col,sz,an)=>'<text x="'+x+'" y="'+y+'" fill="'+(col||'#222')+'" font-size="'+(sz||13)+'" font-weight="700" text-anchor="'+(an||'middle')+'" font-family="system-ui,sans-serif">'+t+'</text>';
+const tri=(x,y,w,h,col)=>'<polygon points="'+x+','+y+' '+(x-w/2)+','+(y+h)+' '+(x+w/2)+','+(y+h)+'" fill="'+col+'"/>';
+const svgP=(vb,inner)=>'<div class="paper"><svg viewBox="'+vb+'" style="width:100%;max-width:440px" role="img">'+inner+'</svg></div>';
+const img=(f,alt)=>'<img src="img/'+f+'" alt="'+alt+'" onerror="this.style.display=\'none\'">';
+const FC='#4a6fa8',EC='#cf4a4a',LC='#d9a622';
+function svgGeneric(){return svgP('0 0 360 170','<rect x="20" y="86" width="320" height="10" rx="5" fill="#222"/>'+tri(180,96,46,40,FC)+arr(60,24,84,EC)+arr(300,24,84,LC)+stx(60,16,'Effort',EC)+stx(300,16,'Load',LC)+stx(180,156,'Fulcrum',FC))}
+function svgMoment(len,dist,l1,l2){const x=30+dist;return '<div class="paper"><svg viewBox="0 0 200 170" style="width:100%;max-width:230px"><rect x="30" y="76" width="160" height="8" rx="4" fill="#555"/><circle cx="30" cy="80" r="9" fill="'+FC+'"/>'+arr(x,76-len,74,EC)+'<line x1="30" y1="104" x2="'+x+'" y2="104" stroke="#222" stroke-width="2"/><line x1="30" y1="98" x2="30" y2="110" stroke="#222" stroke-width="2"/><line x1="'+x+'" y1="98" x2="'+x+'" y2="110" stroke="#222" stroke-width="2"/>'+stx((30+x)/2,124,'distance',null,11)+stx(100,148,l1,EC,14)+stx(100,165,l2,'#222',13)+'</svg></div>'}
+function svgArms(){return svgP('0 0 360 195','<rect x="20" y="74" width="320" height="10" rx="5" fill="#222"/>'+tri(140,84,46,38,FC)+arr(50,18,72,EC)+arr(300,18,72,LC)+stx(50,12,'Effort',EC)+stx(300,12,'Load',LC)+stx(140,148,'Fulcrum',FC)+'<g stroke-dasharray="4 4" stroke="#999" stroke-width="2"><line x1="50" y1="88" x2="50" y2="160"/><line x1="140" y1="124" x2="140" y2="130"/><line x1="300" y1="88" x2="300" y2="160"/></g><g stroke-width="4" stroke-linecap="round"><line x1="50" y1="165" x2="140" y2="165" stroke="'+EC+'"/><line x1="140" y1="165" x2="300" y2="165" stroke="'+LC+'"/></g>'+stx(95,185,'Effort arm',EC)+stx(220,185,'Load arm',LC))}
+function svgCalf(){return svgP('0 0 340 250','<line x1="10" y1="226" x2="330" y2="226" stroke="#888" stroke-width="3"/><line x1="64" y1="224" x2="244" y2="188" stroke="#e5d5b0" stroke-width="16" stroke-linecap="round"/><line x1="64" y1="224" x2="244" y2="188" stroke="#b79d62" stroke-width="2"/><line x1="188" y1="200" x2="186" y2="56" stroke="#efe4c8" stroke-width="16" stroke-linecap="round"/><path d="M200 70 C240 90 244 150 232 176 L216 178 C212 140 204 110 196 84 Z" fill="#d9776b"/><path d="M222 176 L244 190" stroke="#f2e6cf" stroke-width="5"/>'+'<polygon points="64,222 46,244 82,244" fill="'+FC+'"/>'+arr(244,244,200,EC)+arr(186,10,176,LC)+'<g>'+stx(40,176,'Fulcrum',FC,13)+stx(40,192,'(ball of foot)',FC,11)+'</g>'+stx(284,148,'Effort',EC,13)+stx(284,164,'(calf via',EC,11)+stx(284,176,'Achilles)',EC,11)+stx(120,36,'Load',LC,13)+stx(120,52,'(body weight',LC,11)+stx(120,64,'at the ankle)',LC,11))}
+function svgExternal(){return svgP('0 0 360 210','<line x1="40" y1="160" x2="130" y2="160" stroke="#d9b48f" stroke-width="14" stroke-linecap="round"/><line x1="130" y1="160" x2="330" y2="160" stroke="#7a5a3a" stroke-width="8" stroke-linecap="round"/><circle cx="40" cy="160" r="9" fill="'+FC+'"/>'+arr(130,150,112,EC)+arr(330,150,50,LC)+stx(130,102,'Hand: slower',EC,12)+stx(318,40,'Tip: faster',LC,12,'end')+stx(40,190,'Joint (fulcrum)',FC,12,'start')+stx(215,190,'Implement adds length',null,12)+'<g stroke="#999" stroke-width="2"><line x1="130" y1="174" x2="330" y2="174"/></g>')}
+const QS=[
+ {q:'If the fulcrum is closer to the load than to the effort, what do you have?',a:'A mechanical advantage (MA greater than 1)',o:['A mechanical disadvantage (MA less than 1)','MA of exactly 1','It depends only on the size of the load'],w:'A short load arm and a long effort arm give MA = effort arm ÷ load arm, which is greater than 1.'},
+ {q:'In a lever system, the tendency of rotation depends on which of the following?',a:'The distance of the force from the fulcrum and the size of the force applied',o:['The total mass of the lever only','The angle between the lever and the ground only','The type of joint used as the fulcrum'],w:'Moment of force = force × perpendicular distance from the fulcrum.'},
+ {q:'Which statement correctly compares mechanical advantage in the lever types?',a:'Second-class levers have MA greater than 1, third-class levers have MA less than 1',o:['First-class levers always have MA greater than 1','Third-class levers always provide both force and speed advantages','Second-class levers have MA less than 1, first-class levers have MA equal to 0'],w:'1st class: MA can be above, equal to or below 1. 2nd class: always above 1. 3rd class: always below 1.'},
+ {q:'The distance from the fulcrum to the point where the effort is applied is called the…',a:'Effort arm',o:['Load arm','Moment of force','Mechanical advantage'],w:'Effort arm = fulcrum to effort. Load arm = fulcrum to load.'},
+ {q:'Why does an athlete with shorter arms have an advantage in a dumbbell exercise?',a:'The weight is closer to the body, making it easier to lift through the full range of motion',o:['Shorter arms increase the distance the weight travels, making the lift more powerful','Longer arms allow the muscles to shorten less, creating greater force','Arm length does not affect the effort needed to lift a weight'],w:'A shorter load arm means a smaller load moment, so less effort is needed.'},
+ {q:'Decreasing the distance between the effort and the fulcrum (a shorter effort arm) will…',a:'Decrease the mechanical advantage',o:['Increase the mechanical advantage','Have no effect on the mechanical advantage','Always turn the lever into a 2nd class lever'],w:'MA = effort arm ÷ load arm, so a shorter effort arm gives a smaller MA.'},
+ {q:'Which lever has the effort between the fulcrum and the load, and an MA that is always below 1?',a:'3rd class (e.g. a biceps curl)',o:['1st class (e.g. nodding the head)','2nd class (e.g. rising onto the toes)','None: this arrangement is impossible'],w:'3rd class: effort in the middle, so the effort arm is shorter than the load arm (MA < 1). It favours speed and range of motion.'}];
+const RV=[
+ {t:'What is a lever?',h:()=>`<ul><li>A lever is a <b>rigid bar</b> that rotates around a <b>fixed point</b>.</li><li>The fixed point is the <b>fulcrum</b>, also called the axis.</li><li>A <b>force</b> applied to the bar makes it turn and move a <b>load</b>.</li></ul>${svgGeneric()}<h3>In the body</h3><table class="st mt"><tr><td><b>Bone</b></td><td>= the rigid bar</td></tr><tr><td><b>Joint</b></td><td>= the fulcrum</td></tr><tr><td><b>Muscle contraction</b></td><td>= the force that moves it</td></tr></table>`},
+ {t:'Parts of a lever',h:()=>`<div class="g3"><div class="call">${tag('F','Fulcrum')}<br>The point the lever rotates around.<br><i>In the body: the joint.</i></div><div class="call">${tag('E','Effort')}<br>The force applied to move the load.<br><i>In the body: muscle contraction.</i></div><div class="call">${tag('L','Load')}<br>The object or resistance that must be moved.<br><i>In the body: the body part, plus anything it holds.</i></div></div><div class="paper">${img('arm-3rd.png','Forearm holding a ball with the effort, load and fulcrum marked')}</div><div class="fig">Example: a biceps curl. Fulcrum = elbow joint, effort = biceps pulling on the forearm, load = weight of the forearm and the ball.</div>`},
+ {t:'Tendency of rotation',h:()=>`<p>How much a force makes a lever turn depends on <b>two things</b>:</p><div class="g2"><div class="call"><b>1. The size of the force</b><br>How hard it pushes or pulls on the lever.</div><div class="call"><b>2. The distance from the fulcrum</b><br>How far the line of the force is from the fulcrum, measured at a <b>right angle</b>.</div></div><div class="formula">Moment of force = force × perpendicular distance from the fulcrum</div><div class="g2">${svgMoment(46,50,'10 N at 2 m','moment = 20 N·m')}${svgMoment(23,150,'5 N at 6 m','moment = 30 N·m')}</div><p class="sub">The smaller force acts further from the fulcrum, so it has the <b>bigger</b> turning effect. Think of pushing a door near the hinge versus at the handle.</p>`},
+ {t:'Moment arm, effort arm and load arm',h:()=>`<div class="call"><b>Moment arm</b>: the perpendicular distance from the fulcrum to the line of action of a force.</div><div class="g2"><div class="call">${tag('E','Effort arm')}<br>Distance from the fulcrum to where the effort is applied.</div><div class="call">${tag('L','Load arm')}<br>Distance from the fulcrum to the load.</div></div>${svgArms()}<p class="sub">Both arms are measured <b>from the fulcrum</b>. In the body, the muscle's effort arm is the short distance from the joint to where the tendon attaches.</p>`},
+ {t:'Mechanical advantage (MA)',h:()=>`<ul><li>The <b>ratio of the load</b> a lever can move to the <b>effort</b> applied to move it.</li><li>It compares load force with effort force.</li><li>It is a ratio, so it has <b>no units</b>.</li></ul><div class="g2"><div class="call"><b>Using forces</b><div class="formula">MA = load ÷ effort</div></div><div class="call"><b>Using arms</b><div class="formula">MA = effort arm ÷ load arm</div></div></div><p class="sub">Both formulas give the same value for a lever.</p><h3>Try it: change the arms</h3><div class="paper"><svg id="mas" viewBox="0 0 360 134" style="width:100%;max-width:440px"></svg></div><div class="sl"><label>Effort arm: <b id="eav"></b> cm</label><input type="range" id="ea" min="1" max="10" value="4"></div><div class="sl"><label>Load arm: <b id="lav"></b> cm</label><input type="range" id="la" min="1" max="10" value="4"></div><div class="call" id="maout"></div>`,
+  b:r=>{const ea=r.querySelector('#ea'),la=r.querySelector('#la'),svg=r.querySelector('#mas'),out=r.querySelector('#maout');
+   function up(){const E=+ea.value,L=+la.value,ma=Number((E/L).toFixed(2)),load=60,eff=Number((load/(E/L)).toFixed(1));
+    r.querySelector('#eav').textContent=E;r.querySelector('#lav').textContent=L;
+    const ex=180-E*16,lx=180+L*16;
+    svg.innerHTML='<rect x="'+(ex-10)+'" y="74" width="'+(lx-ex+20)+'" height="9" rx="4" fill="#222"/>'+tri(180,83,40,30,FC)+arr(ex,22,72,EC)+arr(lx,22,72,LC)+stx(ex,16,'Effort',EC,12)+stx(lx,16,'Load',LC,12)+stx(180,128,'Fulcrum',FC,12);
+    out.innerHTML='MA = effort arm ÷ load arm = '+E+' ÷ '+L+' = <b>'+ma+'</b><br>For a 60 kgf load: effort needed = load ÷ MA = 60 ÷ '+ma+' = <b>'+eff+' kgf</b><br>'+(ma>1?'<b>MA &gt; 1</b>: a force advantage. A small effort moves a larger load.':ma<1?'<b>MA &lt; 1</b>: no force advantage (more effort than load), but the load moves faster and through a bigger range of motion.':'<b>MA = 1</b>: effort equals load; no force gain and no speed gain.')}
+   ea.oninput=la.oninput=up;up()}},
+ {t:'Three types of levers',h:()=>`<div class="g3"><div><div class="paper">${img('lever-1st.png','1st class lever')}</div><div class="call"><b>1st class</b><br>${tag('F','Fulcrum')} in the middle<br><i>Nodding the head</i></div></div><div><div class="paper">${img('lever-2nd.png','2nd class lever')}</div><div class="call"><b>2nd class</b><br>${tag('L','Load')} in the middle<br><i>Rising onto your toes</i></div></div><div><div class="paper">${img('lever-3rd.png','3rd class lever')}</div><div class="call"><b>3rd class</b><br>${tag('E','Effort')} in the middle<br><i>Biceps curl at the elbow</i></div></div></div><div class="call"><b>Memory aid:</b> the middle part names the class. <b>1st = Fulcrum, 2nd = Load, 3rd = Effort</b> (1-2-3 = F-L-E).</div>`},
+ {t:'1st class: fulcrum in the middle',h:()=>`<div class="g2"><div><div class="paper">${img('lever-1st.png','1st class lever')}</div></div><div><div class="paper">${img('neck-1st.png','Neck extension: head on the spine')}</div><div class="fig">Neck extension: fulcrum = occipital facet, effort = neck muscle force, load = weight of the head.</div></div></div><div class="call"><b>MA:</b> can be above, equal to or below 1. It depends on where the fulcrum sits. Fulcrum closer to the load: MA &gt; 1. Fulcrum in the centre: MA = 1. Fulcrum closer to the effort: MA &lt; 1.</div><h3>Body examples</h3><ul><li>Nodding / tilting the head back (neck)</li><li>Triceps straightening the elbow</li><li>Arching the back (spine extension)</li><li>Hip abductors when balancing on one leg</li></ul>`},
+ {t:'2nd class: load in the middle',h:()=>`<div class="g2"><div><div class="paper">${img('lever-2nd.png','2nd class lever')}</div></div><div>${svgCalf()}<div class="fig">Rising onto the toes (simplified): fulcrum = ball of the foot, load = body weight at the ankle, effort = calf muscles through the Achilles tendon.</div></div></div><div class="call"><b>MA:</b> always above 1. The effort arm is always longer than the load arm, so a <b>small effort moves a larger load</b>: a force advantage.</div><h3>Body examples</h3><ul><li>Rising onto the toes (calf raise, walking on tiptoe)</li><li>Push-up (toes are the fulcrum)</li><li>Push-off from the toes when sprinting or jumping</li></ul><p class="sub">2nd class levers are the least common type in the body.</p>`},
+ {t:'3rd class: effort in the middle',h:()=>`<div class="g2"><div><div class="paper">${img('lever-3rd.png','3rd class lever')}</div></div><div><div class="paper">${img('arm-3rd.png','Biceps curl with effort, load and fulcrum marked')}</div><div class="fig">Biceps curl: the effort (biceps) acts between the elbow (fulcrum) and the hand (load).</div></div></div><div class="call"><b>MA:</b> always below 1. The effort arm is always shorter than the load arm, so there is <b>no force advantage</b>. It favours <b>speed and range of motion</b>.</div><h3>Body examples</h3><ul><li>Biceps curl (elbow)</li><li>Knee extension (quadriceps)</li><li>Raising the arm sideways (deltoid at the shoulder)</li><li>Bending the knee (hamstrings)</li></ul><p class="sub">Most levers in the body are 3rd class.</p>`},
+ {t:'MA values by lever type',h:()=>`<table class="st mt"><tr><th>Type</th><th>Arrangement</th><th>MA value</th><th>Favours</th></tr><tr><td><b>1st class</b></td><td>${tag('F','Fulcrum')} between effort and load</td><td>Can be above, equal to or below 1</td><td>Depends on where the fulcrum sits</td></tr><tr><td><b>2nd class</b></td><td>${tag('L','Load')} between fulcrum and effort</td><td>Always above 1</td><td>Force: a small effort moves a larger load</td></tr><tr><td><b>3rd class</b></td><td>${tag('E','Effort')} between fulcrum and load</td><td>Always below 1</td><td>Speed and range of motion, not force</td></tr></table><div class="call"><b>Why?</b> MA = effort arm ÷ load arm. In 2nd class the effort is always further out than the load (longer effort arm). In 3rd class the effort is always nearer the fulcrum than the load (shorter effort arm).</div>`},
+ {t:'The arm as a lever to project an object',h:()=>`<p>Levers inside the body can be used to <b>project an object</b>. For the arm, note what plays each role:</p><div class="g3"><div class="call">${tag('E','Effort')}<br>The force the muscles apply by pulling on the bone.</div><div class="call">${tag('F','Fulcrum')}<br>The joint the limb rotates around.</div><div class="call">${tag('L','Load')}<br>The weight of the limb plus the object being projected.</div></div><div class="paper">${img('arm-3rd.png','Arm as a lever holding a ball')}</div><div class="call">In this arm, the effort sits <b>between</b> the elbow and the hand, so it is a <b>3rd class</b> lever. A short effort arm means a small muscle shortening moves the hand a long way fast, so the object is released at <b>high speed</b>.</div>`},
+ {t:'External levers',h:()=>`<ul><li>Implements held in the hand that <b>extend the body's own lever</b>.</li><li>They <b>add length</b> to the lever, so the end of the implement moves <b>faster</b>.</li><li>The object is struck or released at a <b>higher speed</b>.</li></ul>${svgExternal()}<div class="g2"><div class="call">🎾 Tennis racket</div><div class="call">⚾ Baseball bat</div><div class="call">⛳ Golf club</div><div class="call">🏒 Hockey stick</div></div><p class="sub">The trade-off: a longer implement means a longer load arm, so the MA drops and more effort is needed.</p>`},
+ {t:'Check yourself',h:()=>'<div id="qz"></div>',b:bindQuiz}];
+function bindQuiz(root){
+  const box=root.querySelector('#qz');let k=0,ok=0,Q=shuffle(QS);
+  function draw(){
+    if(k>=Q.length){const pass=ok>=Math.ceil(Q.length*.7);let extra='';
+      if(pass&&!S.review.paid){S.review.paid=true;addRep(20);extra='<p>🎉 First pass: <b>+20 reputation</b>!</p>'}
+      save();box.innerHTML='<div class="call"><b>Score: '+ok+' / '+Q.length+'</b><br>'+(pass?'Great work: you are ready for court.':'Look back over the pages above and try again.')+'</div>'+extra;
+      const rw=document.createElement('div');rw.className='row';rw.appendChild(btn('↺ Try again','',()=>{k=0;ok=0;Q=shuffle(QS);draw()}));box.appendChild(rw);return}
+    const q=Q[k];box.innerHTML='<p class="sub">Question '+(k+1)+' of '+Q.length+'</p><p><b>'+q.q+'</b></p><div id="qo"></div><div id="qf"></div>';
+    const qo=box.querySelector('#qo'),qf=box.querySelector('#qf');
+    shuffle([q.a].concat(q.o)).forEach(o=>{const b=btn(o,'opt',()=>{
+      const right=o===q.a;S.review[right?'ok':'bad']++;if(right)ok++;save();sfx[right?'cheer':'bad']();
+      [...qo.children].forEach(x=>{x.disabled=true;if(x.textContent===q.a)x.classList.add('good');else if(x===b)x.classList.add('bad')});
+      qf.innerHTML='<div class="call">'+(right?'✔ Correct! ':'✘ Not quite. ')+q.w+'</div>';
+      const nb=btn(k+1<Q.length?'Next question ▶':'See score','primary',()=>{k++;draw()});qf.appendChild(nb)});qo.appendChild(b)})}
+  draw()}
+function openReview(first){
+  let i=0;const card=openModal('<div id="rvh"></div><div id="rvb"></div><div class="row" id="rvn"></div>');
+  const hd=card.querySelector('#rvh'),bd=card.querySelector('#rvb'),nv=card.querySelector('#rvn');
+  function show(n){i=clamp(n,0,RV.length-1);const p=RV[i];
+    hd.innerHTML='<div class="sub">📚 Review · '+(i+1)+' / '+RV.length+'</div><h2>'+p.t+'</h2><div class="dots">'+RV.map((_,k)=>'<i class="'+(k===i?'on':'')+'"></i>').join('')+'</div>';
+    bd.innerHTML=p.h();if(p.b)p.b(bd);$modal.scrollTop=0;card.scrollTop=0;nv.innerHTML='';
+    if(i>0)nv.appendChild(btn('◀ Back','',()=>show(i-1)));
+    if(i<RV.length-1)nv.appendChild(btn('Next ▶','primary',()=>show(i+1)));
+    else nv.appendChild(btn(first?'▶ Start Trial 1':'Done','primary',()=>{if(first)startTrial();else{closeModal();openMenu()}}));
+    nv.appendChild(btn(first&&i===0?'Skip review':'✕ Close','',()=>{closeModal();openMenu()}))}
+  show(0)}
 
 /* ================= boot ================= */
 function boot(){
