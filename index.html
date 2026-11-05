@@ -638,7 +638,7 @@ function pickClaims(level){
 }
 function startCustom(){const pool=shuffle(S.custom);startTrial({claims:pool.slice(0,4)})}
 function startTrial(o){
-  o=(o&&o.claims&&o.claims.length)?o:null;G.opts=o;G.lucky=0;G.bubble=false;G.labels=false;
+  o=(o&&o.claims&&o.claims.length)?o:null;G.opts=o;G.lucky=0;G.errs=0;G.bubble=false;G.labels=false;
   closeModal();newCast();
   const lv=S.level,detail=o?2:(lv<=2?0:lv<=4?1:2);
   G.detail=detail;G.trial={level:lv,claims:o?o.claims:pickClaims(lv),idx:0,title:o?'The Custom Case':pick(CASES),detail,custom:!!o};
@@ -706,28 +706,32 @@ function outcome(r){
     const gain=G.firstTry?25:15;addRep(gain);floater('+'+gain+' rep','#ffe27a',110,330);
     ui('You','The see-saw proves it: the <b>'+real+' lever</b> cannot do what the prosecution claims. '+(G.detail>=1?torqueTxt(r)+' The effort loses, so the claim is <b>physically impossible</b>.':'The effort cannot overcome the load, so the claim is <b>physically impossible</b>!'),realTxt,[{t:'Continue',c:'primary',f:()=>afterClaim()}]);
   }else if(!r.lifted){
-    st.bad++;G.firstTry=false;G.lucky=(G.lucky||0)+1;
+    st.bad++;G.firstTry=false;G.lucky=(G.lucky||0)+1;G.errs=(G.errs||0)+1;
     if(G.lucky>=2){mistrial(mine,realTxt,r);return}
     G.phase='expert';G.expertTarget=1;G.profMood='';G.youMood='shock';G.juryMood='gasp';G.juryUntil=performance.now()/1000+1.2;sfx.obj();
     banner('OBJECTION!','#ffd45a','Expert witness',1.6,-.06);addRep(-10);floater('−10 rep','#ffb3b3',110,330);
     ui('Expert','“Your Honor, the defense got <b>lucky</b>! Their see-saw looks like a <b>'+mine+'</b> lever, but that is not how the body works. '+realTxt+'”',
       '“The verdict would be thrown out because the model is wrong. Rebuild it correctly.” <b>⚠ Warning: one more incorrect model and the judge will declare a mistrial.</b> '+(G.detail>=1?'(Your model: '+torqueTxt(r)+')':''),
-      [{t:'↺ Try again',c:'primary',f:()=>{G.expertTarget=0;G.youMood='';G.phase='arrange';G.bubble=true;G.labels=false;G.bubbleT=performance.now()/1000;resetTokens();refreshArrange()}}]);
+      [{t:'↺ Try again',c:'primary',f:()=>{G.expertTarget=0;G.youMood='';G.phase='arrange';G.bubble=true;G.labels=false;G.bubbleT=performance.now()/1000;resetTokens();refreshArrange()}}].concat(reviewOffer(false)));
   }else{
     st.bad++;G.phase='lost';showLabelled();G.jailed=true;G.juryMood='gasp';G.juryUntil=performance.now()/1000+3;G.judgeMood='angry';G.profMood='smug';G.youMood='shock';G.clientMood='shock';G.gavelT=performance.now()/1000;sfx.gavel();sfx.gasp();
     banner('GUILTY!','#ff6b6b','Your client goes to jail',2.4);
     ui('Judge','The jury watched the load rise! Your model made the effort look strong enough, so the verdict is <b>GUILTY</b>. Your client is taken away. Trial lost.',
       '<b>What went wrong:</b> you built a <b>'+mine+'</b> lever, which exaggerated the effort. '+(G.detail>=1?torqueTxt(r)+' ':'')+realTxt,
-      [{t:'↺ Retry this trial',c:'primary',f:()=>{startTrial(G.opts)}},{t:'Menu',f:openMenu}]);
+      [{t:'↺ Retry this trial',c:'primary',f:()=>{startTrial(G.opts)}},{t:'Menu',f:openMenu}].concat(reviewOffer(true)));
     save();
   }
 }
+function reviewOffer(loss){
+  if(G.opts||S.level>3)return[];
+  if(!loss&&(G.errs||0)<2)return[];
+  return[{t:'📚 Review the basics, then restart',c:'good',f:()=>openReview(false,()=>startTrial(G.opts))}]}
 function mistrial(mine,realTxt,r){
   G.phase='lost';showLabelled();G.expertTarget=1;G.juryMood='gasp';G.juryUntil=performance.now()/1000+2.5;G.judgeMood='angry';G.youMood='shock';G.profMood='';G.gavelT=performance.now()/1000;sfx.gavel();sfx.bad();
   banner('MISTRIAL!','#ffb347','Trial failed',2.4);addRep(-15);floater('−15 rep','#ffb3b3',110,330);
   ui('Judge','Counsel has now presented an <b>incorrect lever model twice in a row</b>. A correct argument cannot be built on the wrong lever, even when the demonstration happens to favour the defense. I declare a <b>MISTRIAL</b>. The trial is failed.',
     '<b>What went wrong:</b> you built a <b>'+mine+'</b> lever. '+realTxt,
-    [{t:'↺ Retry this trial',c:'primary',f:()=>startTrial(G.opts)},{t:'Menu',f:openMenu}]);
+    [{t:'↺ Retry this trial',c:'primary',f:()=>startTrial(G.opts)},{t:'Menu',f:openMenu}].concat(reviewOffer(true)));
   save();
 }
 function afterClaim(){
@@ -753,7 +757,7 @@ function runQuiz(list,done){
   if(!list.length)return done();
   const q=list.shift(),who=q.who||'Expert';if(who==='Expert')G.expertTarget=1;G.phase='quiz';
   const acts=q.opts.map(o=>({t:o,f:()=>{
-    const ok=o===q.ans;if(q.recall)S.recall[q.cls][ok?'ok':'bad']++;else S.quiz[ok?'ok':'bad']++;
+    const ok=o===q.ans;if(q.recall&&!ok)G.errs=(G.errs||0)+1;if(q.recall)S.recall[q.cls][ok?'ok':'bad']++;else S.quiz[ok?'ok':'bad']++;
     const gain=q.gain||10;
     if(ok){addRep(gain);floater('+'+gain+' rep','#ffe27a',110,330);sfx.cheer()}else{sfx.bad()}
     ui(who,ok?'✔ Correct! '+q.why:(q.recall?'✘ Not quite. The court notes your answer; let\'s see how the evidence plays out.':'✘ Not quite. The answer is: <b>'+q.ans+'</b>. '+q.why),'',[{t:'Continue',c:'primary',f:()=>{G.expertTarget=0;runQuiz(list,done)}}]);save()}}));
@@ -1021,14 +1025,31 @@ const RV=[
  {t:'Parts of a lever',h:()=>`<div class="g3"><div class="call">${tag('F','Fulcrum')}<br>The point the lever rotates around.<br><i>In the body: the joint.</i></div><div class="call">${tag('E','Effort')}<br>The force applied to move the load.<br><i>In the body: muscle contraction.</i></div><div class="call">${tag('L','Load')}<br>The object or resistance that must be moved.<br><i>In the body: the body part, plus anything it holds.</i></div></div><div class="paper">${img('arm-3rd.png','Forearm holding a ball with the effort, load and fulcrum marked')}</div><div class="fig">Example: a biceps curl. Fulcrum = elbow joint, effort = biceps pulling on the forearm, load = weight of the forearm and the ball.</div>`},
  {t:'Tendency of rotation',h:()=>`<p>How much a force makes a lever turn depends on <b>two things</b>:</p><div class="g2"><div class="call"><b>1. The size of the force</b><br>How hard it pushes or pulls on the lever.</div><div class="call"><b>2. The distance from the fulcrum</b><br>How far the line of the force is from the fulcrum, measured at a <b>right angle</b>.</div></div><div class="formula">Moment of force = force × perpendicular distance from the fulcrum</div><div class="g2">${svgMoment(46,50,'10 N at 2 m','moment = 20 N·m')}${svgMoment(23,150,'5 N at 6 m','moment = 30 N·m')}</div><p class="sub">The smaller force acts further from the fulcrum, so it has the <b>bigger</b> turning effect. Think of pushing a door near the hinge versus at the handle.</p>`},
  {t:'Moment arm, effort arm and load arm',h:()=>`<div class="call"><b>Moment arm</b>: the perpendicular distance from the fulcrum to the line of action of a force.</div><div class="g2"><div class="call">${tag('E','Effort arm')}<br>Distance from the fulcrum to where the effort is applied.</div><div class="call">${tag('L','Load arm')}<br>Distance from the fulcrum to the load.</div></div>${svgArms()}<p class="sub">Both arms are measured <b>from the fulcrum</b>. In the body, the muscle's effort arm is the short distance from the joint to where the tendon attaches.</p>`},
- {t:'Mechanical advantage (MA)',h:()=>`<ul><li>The <b>ratio of the load</b> a lever can move to the <b>effort</b> applied to move it.</li><li>It compares load force with effort force.</li><li>It is a ratio, so it has <b>no units</b>.</li></ul><div class="g2"><div class="call"><b>Using forces</b><div class="formula">MA = load ÷ effort</div></div><div class="call"><b>Using arms</b><div class="formula">MA = effort arm ÷ load arm</div></div></div><p class="sub">Both formulas give the same value for a lever.</p><h3>Try it: change the arms</h3><div class="paper"><svg id="mas" viewBox="0 0 360 134" style="width:100%;max-width:440px"></svg></div><div class="sl"><label>Effort arm: <b id="eav"></b> cm</label><input type="range" id="ea" min="1" max="10" value="4"></div><div class="sl"><label>Load arm: <b id="lav"></b> cm</label><input type="range" id="la" min="1" max="10" value="4"></div><div class="call" id="maout"></div>`,
+ {t:'Mechanical advantage (MA)',h:()=>`<ul><li>The <b>ratio of the load</b> a lever can move to the <b>effort</b> applied to move it.</li><li>It compares load force with effort force.</li><li>It is a ratio, so it has <b>no units</b>.</li></ul><div class="g2"><div class="call"><b>Using forces</b><div class="formula">MA = load ÷ effort</div></div><div class="call"><b>Using arms</b><div class="formula">MA = effort arm ÷ load arm</div></div></div><p class="sub">Both formulas give the same value for a lever.</p><h3>Try it: slide the effort and the load</h3><p class="sub">Move <b>E</b> and <b>L</b> along the bar. Put them on opposite sides, on the same side, or on top of each other, and watch the lever class change.</p><div class="paper"><svg id="mas" viewBox="0 0 360 150" style="width:100%;max-width:340px"></svg></div><div class="chips" id="mpre"><button class="chip2" data-p="-6,3">1st class</button><button class="chip2" data-p="8,4">2nd class</button><button class="chip2" data-p="3,8">3rd class</button><button class="chip2" data-p="5,5">Same spot</button><button class="chip2" data-p="0,5">Effort at fulcrum</button></div><div class="sl"><label>Effort (E) position: <b id="eav"></b></label><input type="range" id="ea" min="-10" max="10" value="-4"></div><div class="sl"><label>Load (L) position: <b id="lav"></b></label><input type="range" id="la" min="-10" max="10" value="4"></div><p class="sub">0 is the fulcrum. Negative = left of it, positive = right of it (1 step = 1 cm).</p><div class="call" id="maout"></div>`,
   b:r=>{const ea=r.querySelector('#ea'),la=r.querySelector('#la'),svg=r.querySelector('#mas'),out=r.querySelector('#maout');
-   function up(){const E=+ea.value,L=+la.value,ma=Number((E/L).toFixed(2)),load=60,eff=Number((load/(E/L)).toFixed(1));
-    r.querySelector('#eav').textContent=E;r.querySelector('#lav').textContent=L;
-    const ex=180-E*16,lx=180+L*16;
-    svg.innerHTML='<rect x="'+(ex-10)+'" y="74" width="'+(lx-ex+20)+'" height="9" rx="4" fill="#222"/>'+tri(180,83,40,30,FC)+arr(ex,22,72,EC)+arr(lx,22,72,LC)+stx(ex,16,'Effort',EC,12)+stx(lx,16,'Load',LC,12)+stx(180,128,'Fulcrum',FC,12);
-    out.innerHTML='MA = effort arm ÷ load arm = '+E+' ÷ '+L+' = <b>'+ma+'</b><br>For a 60 kgf load: effort needed = load ÷ MA = 60 ÷ '+ma+' = <b>'+eff+' kgf</b><br>'+(ma>1?'<b>MA &gt; 1</b>: a force advantage. A small effort moves a larger load.':ma<1?'<b>MA &lt; 1</b>: no force advantage (more effort than load), but the load moves faster and through a bigger range of motion.':'<b>MA = 1</b>: effort equals load; no force gain and no speed gain.')}
-   ea.oninput=la.oninput=up;up()}},
+   const pl=v=>v===0?'at the fulcrum':Math.abs(v)+' cm '+(v<0?'left':'right')+' of the fulcrum';
+   const bdg=(x,y,k,c)=>'<circle cx="'+x+'" cy="'+y+'" r="10" fill="'+c+'"/>'+stx(x,y+5,k,'#fff',13);
+   function up(){const E=+ea.value,L=+la.value,ex=180+E*16,lx=180+L*16,opp=E*L<0;
+    r.querySelector('#eav').textContent=pl(E);r.querySelector('#lav').textContent=pl(L);
+    const x0=Math.min(ex,lx,180)-18,x1=Math.max(ex,lx,180)+18;
+    let g='<rect x="'+x0+'" y="76" width="'+(x1-x0)+'" height="9" rx="4" fill="#222"/>'+tri(180,85,42,34,FC)+stx(180,112,'F','#fff',14);
+    g+=arr(lx,26,72,LC)+bdg(lx,14,'L',LC);
+    g+=opp?arr(ex,26,72,EC)+bdg(ex,14,'E',EC):arr(ex,128,89,EC)+bdg(ex,138,'E',EC);
+    svg.innerHTML=g;
+    let h;
+    if(E===0||L===0){
+      h='<b>⚠ Not a working lever.</b> '+(E===0&&L===0?'The effort and the load are both at the fulcrum':E===0?'The effort is applied at the fulcrum':'The load is sitting on the fulcrum')+'. A force at the fulcrum has an arm of 0, so its moment (force × 0) is 0 and it cannot turn the bar. With nothing to turn the bar, there is no effort arm or load arm to compare, so no mechanical advantage can be worked out.'}
+    else if(E===L){
+      h='<b>⚠ No longer a lever.</b> The effort and the load are at the <b>same point</b>, so the effort just lifts the load straight up, like picking up a bag by hand. The effort arm and the load arm are equal ('+Math.abs(E)+' cm), so MA = 1: the bar gives no advantage and the fulcrum has nothing to do. It has stopped working as a lever.'}
+    else{
+      const cls=opp?1:(Math.abs(L)<Math.abs(E)?2:3),ea_=Math.abs(E),la_=Math.abs(L),ma=Number((ea_/la_).toFixed(2)),eff=Number((60/(ea_/la_)).toFixed(1));
+      const mid=['','Fulcrum','Load','Effort'][cls],tg=['','F','L','E'][cls];
+      const rule=['','In a 1st class lever, MA can be above, equal to or below 1: it depends on where the fulcrum sits.','In a 2nd class lever the effort is always further from the fulcrum than the load, so MA is <b>always above 1</b>.','In a 3rd class lever the effort is always nearer the fulcrum than the load, so MA is <b>always below 1</b>.'][cls];
+      h=tag(tg,mid+' in the middle')+' → <b>'+ord[cls]+' class lever</b><br>'+rule+'<br>MA = effort arm ÷ load arm = '+ea_+' ÷ '+la_+' = <b>'+ma+'</b><br>For a 60 kgf load: effort needed = load ÷ MA = 60 ÷ '+ma+' = <b>'+eff+' kgf</b><br>'+(ma>1?'<b>MA &gt; 1</b>: a force advantage. A small effort moves a larger load.':ma<1?'<b>MA &lt; 1</b>: no force advantage (more effort than load), but the load moves faster and through a bigger range of motion.':'<b>MA = 1</b>: effort equals load; no force gain and no speed gain.')}
+    out.innerHTML=h}
+   ea.oninput=la.oninput=up;
+   r.querySelectorAll('#mpre .chip2').forEach(b=>b.onclick=()=>{const[e,l]=b.dataset.p.split(',');ea.value=e;la.value=l;up()});
+   up()}},
  {t:'Three types of levers',h:()=>`<div class="g3"><div><div class="paper">${img('lever-1st.png','1st class lever')}</div><div class="call"><b>1st class</b><br>${tag('F','Fulcrum')} in the middle<br><i>Nodding the head</i></div></div><div><div class="paper">${img('lever-2nd.png','2nd class lever')}</div><div class="call"><b>2nd class</b><br>${tag('L','Load')} in the middle<br><i>Rising onto your toes</i></div></div><div><div class="paper">${img('lever-3rd.png','3rd class lever')}</div><div class="call"><b>3rd class</b><br>${tag('E','Effort')} in the middle<br><i>Biceps curl at the elbow</i></div></div></div><div class="call"><b>Memory aid:</b> the middle part names the class. <b>1st = Fulcrum, 2nd = Load, 3rd = Effort</b> (1-2-3 = F-L-E).</div>`},
  {t:'1st class: fulcrum in the middle',h:()=>`<div class="g2"><div><div class="paper">${img('lever-1st.png','1st class lever')}</div></div><div><div class="paper">${img('neck-1st.png','Neck extension: head on the spine')}</div><div class="fig">Neck extension: fulcrum = occipital facet, effort = neck muscle force, load = weight of the head.</div></div></div><div class="call"><b>MA:</b> can be above, equal to or below 1. It depends on where the fulcrum sits. Fulcrum closer to the load: MA &gt; 1. Fulcrum in the centre: MA = 1. Fulcrum closer to the effort: MA &lt; 1.</div><h3>Body examples</h3><ul><li>Nodding / tilting the head back (neck)</li><li>Triceps straightening the elbow</li><li>Arching the back (spine extension)</li><li>Hip abductors when balancing on one leg</li></ul>`},
  {t:'2nd class: load in the middle',h:()=>`<div class="g2"><div><div class="paper">${img('lever-2nd.png','2nd class lever')}</div></div><div>${svgCalf()}<div class="fig">Rising onto the toes (simplified): fulcrum = ball of the foot, load = body weight at the ankle, effort = calf muscles through the Achilles tendon.</div></div></div><div class="call"><b>MA:</b> always above 1. The effort arm is always longer than the load arm, so a <b>small effort moves a larger load</b>: a force advantage.</div><h3>Body examples</h3><ul><li>Rising onto the toes (calf raise, walking on tiptoe)</li><li>Push-up (toes are the fulcrum)</li><li>Push-off from the toes when sprinting or jumping</li></ul><p class="sub">2nd class levers are the least common type in the body.</p>`},
@@ -1052,7 +1073,7 @@ function bindQuiz(root){
       qf.innerHTML='<div class="call">'+(right?'✔ Correct! ':'✘ Not quite. ')+q.w+'</div>';
       const nb=btn(k+1<Q.length?'Next question ▶':'See score','primary',()=>{k++;draw()});qf.appendChild(nb)});qo.appendChild(b)})}
   draw()}
-function openReview(first){
+function openReview(first,after){
   let i=0;const card=openModal('<div id="rvh"></div><div id="rvb"></div><div class="row" id="rvn"></div>');
   const hd=card.querySelector('#rvh'),bd=card.querySelector('#rvb'),nv=card.querySelector('#rvn');
   function show(n){i=clamp(n,0,RV.length-1);const p=RV[i];
@@ -1060,8 +1081,8 @@ function openReview(first){
     bd.innerHTML=p.h();if(p.b)p.b(bd);$modal.scrollTop=0;card.scrollTop=0;nv.innerHTML='';
     if(i>0)nv.appendChild(btn('◀ Back','',()=>show(i-1)));
     if(i<RV.length-1)nv.appendChild(btn('Next ▶','primary',()=>show(i+1)));
-    else nv.appendChild(btn(first?'▶ Start Trial 1':'Done','primary',()=>{if(first)startTrial();else{closeModal();openMenu()}}));
-    nv.appendChild(btn(first&&i===0?'Skip review':'✕ Close','',()=>{closeModal();openMenu()}))}
+    else nv.appendChild(btn(after?'▶ Restart my trial':first?'▶ Start Trial 1':'Done','primary',()=>{if(after)after();else if(first)startTrial();else{closeModal();openMenu()}}));
+    nv.appendChild(btn(after?'Skip: restart trial':first&&i===0?'Skip review':'✕ Close','',()=>{if(after)after();else{closeModal();openMenu()}}))}
   show(0)}
 
 /* ================= boot ================= */
