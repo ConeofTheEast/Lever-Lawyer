@@ -528,7 +528,7 @@ function pickClaims(level){
 }
 function startCustom(){const pool=shuffle(S.custom);startTrial({claims:pool.slice(0,4)})}
 function startTrial(o){
-  o=(o&&o.claims&&o.claims.length)?o:null;G.opts=o;
+  o=(o&&o.claims&&o.claims.length)?o:null;G.opts=o;G.lucky=0;
   closeModal();newCast();
   const lv=S.level,detail=o?2:(lv<=2?0:lv<=4?1:2);
   G.detail=detail;G.trial={level:lv,claims:o?o.claims:pickClaims(lv),idx:0,title:o?'The Custom Case':pick(CASES),detail,custom:!!o};
@@ -545,14 +545,14 @@ function showClaim(){
   G.profMood='smug';G.youMood='';G.juryMood='idle';resetTokens();
   const pre='<i>Claim '+(tr.idx+1)+' of '+tr.claims.length+'</i><br>';
   G.phase='quiz';
-  ui('Prosecutor',pre+'“'+G.claim.say+'”','Before the demonstration, the judge will ask you two <b>recall</b> questions. Answer from memory.',
-    [{t:'Answer the judge ▶',c:'primary',f:()=>runQuiz([classQ(G.claim),fulcQ(G.claim)],()=>{G.phase='arrange';G.expertTarget=0;refreshArrange(pre)})}]);
+  ui('Prosecutor',pre+'“'+G.claim.say+'”','Before the demonstration, the judge will ask you a <b>recall</b> question. Answer from memory.',
+    [{t:'Answer the judge ▶',c:'primary',f:()=>runQuiz([Math.random()<.5?classQ(G.claim):fulcQ(G.claim)],()=>{G.phase='arrange';G.expertTarget=0;refreshArrange(pre)})}]);
 }
 function anatText(cl){return 'The '+cl.joint.toLowerCase()+' is a <b>'+ord[cl.cls]+'-class lever</b>: Fulcrum = '+cl.F+'; Effort = '+cl.Ef+'; Load = '+cl.Lo+'. The <b>'+MIDDLE[cl.cls]+'</b> sits in the middle.'}
 function classQ(cl){return{q:'For the record, counsel: what <b>class of lever</b> is the <b>'+cl.joint+'</b> as the prosecution describes it?',
-  opts:['1st class lever','2nd class lever','3rd class lever'],ans:ord[cl.cls]+' class lever',why:anatText(cl),recall:1,cls:cl.cls,who:'Judge',gain:5,
+  opts:['1st class lever','2nd class lever','3rd class lever'],ans:ord[cl.cls]+' class lever',why:'',recall:1,cls:cl.cls,who:'Judge',gain:5,
   info:'Recall check: answer from memory before you build the see-saw (+5 rep for a correct answer).'}}
-function fulcQ(cl){return Object.assign(anatomyQ(cl,'F'),{why:anatText(cl),recall:1,cls:cl.cls,who:'Judge',gain:5,
+function fulcQ(cl){return Object.assign(anatomyQ(cl,'F'),{why:'',recall:1,cls:cl.cls,who:'Judge',gain:5,
   info:'Recall check: answer from memory (+5 rep for a correct answer).'})}
 function infoLine(){
   const cl=G.claim,d=G.detail;
@@ -588,15 +588,17 @@ function outcome(r){
   const mine=ord[r.cl]+'-class (MA = '+(r.ma===.5?'0.5':r.ma)+')',real=ord[cl.cls]+'-class';
   const realTxt='The '+cl.joint.toLowerCase()+' is a <b>'+real+' lever</b>: Fulcrum = '+cl.F+'; Effort = '+cl.Ef+'; Load = '+cl.Lo+'. The <b>'+MIDDLE[cl.cls]+'</b> sits in the middle.';
   if(r.correct){
-    st.ok++;G.phase='won-claim';G.juryMood='cheer';G.juryUntil=performance.now()/1000+2.6;G.profMood='angry';G.youMood='cheer';G.clientMood='cheer';sfx.cheer();
+    st.ok++;G.lucky=0;G.phase='won-claim';G.juryMood='cheer';G.juryUntil=performance.now()/1000+2.6;G.profMood='angry';G.youMood='cheer';G.clientMood='cheer';sfx.cheer();
     banner('IMPOSSIBLE!','#7cf0b8','The claim fails',1.7);
     const gain=G.firstTry?25:15;addRep(gain);floater('+'+gain+' rep','#ffe27a',110,330);
     ui('You','The see-saw proves it: the <b>'+real+' lever</b> cannot do what the prosecution claims. '+(G.detail>=1?torqueTxt(r)+' The effort loses, so the claim is <b>physically impossible</b>.':'The effort cannot overcome the load, so the claim is <b>physically impossible</b>!'),realTxt,[{t:'Continue',c:'primary',f:()=>afterClaim()}]);
   }else if(!r.lifted){
-    st.bad++;G.firstTry=false;G.phase='expert';G.expertTarget=1;G.profMood='';G.youMood='shock';G.juryMood='gasp';G.juryUntil=performance.now()/1000+1.2;sfx.obj();
+    st.bad++;G.firstTry=false;G.lucky=(G.lucky||0)+1;
+    if(G.lucky>=2){mistrial(mine,realTxt,r);return}
+    G.phase='expert';G.expertTarget=1;G.profMood='';G.youMood='shock';G.juryMood='gasp';G.juryUntil=performance.now()/1000+1.2;sfx.obj();
     banner('OBJECTION!','#ffd45a','Expert witness',1.6,-.06);addRep(-10);floater('−10 rep','#ffb3b3',110,330);
     ui('Expert','“Your Honor, the defense got <b>lucky</b>! Their see-saw looks like a <b>'+mine+'</b> lever, but that is not how the body works. '+realTxt+'”',
-      '“The verdict would be thrown out because the model is wrong. Rebuild it correctly.” '+(G.detail>=1?'(Your model: '+torqueTxt(r)+')':''),
+      '“The verdict would be thrown out because the model is wrong. Rebuild it correctly.” <b>⚠ Warning: one more incorrect model and the judge will declare a mistrial.</b> '+(G.detail>=1?'(Your model: '+torqueTxt(r)+')':''),
       [{t:'↺ Try again',c:'primary',f:()=>{G.expertTarget=0;G.youMood='';G.phase='arrange';resetTokens();refreshArrange()}}]);
   }else{
     st.bad++;G.phase='lost';G.jailed=true;G.juryMood='gasp';G.juryUntil=performance.now()/1000+3;G.judgeMood='angry';G.profMood='smug';G.youMood='shock';G.clientMood='shock';G.gavelT=performance.now()/1000;sfx.gavel();sfx.gasp();
@@ -606,6 +608,14 @@ function outcome(r){
       [{t:'↺ Retry this trial',c:'primary',f:()=>{startTrial(G.opts)}},{t:'Menu',f:openMenu}]);
     save();
   }
+}
+function mistrial(mine,realTxt,r){
+  G.phase='lost';G.expertTarget=1;G.juryMood='gasp';G.juryUntil=performance.now()/1000+2.5;G.judgeMood='angry';G.youMood='shock';G.profMood='';G.gavelT=performance.now()/1000;sfx.gavel();sfx.bad();
+  banner('MISTRIAL!','#ffb347','Trial failed',2.4);addRep(-15);floater('−15 rep','#ffb3b3',110,330);
+  ui('Judge','Counsel has now presented an <b>incorrect lever model twice in a row</b>. A correct argument cannot be built on the wrong lever, even when the demonstration happens to favour the defense. I declare a <b>MISTRIAL</b>. The trial is failed.',
+    '<b>What went wrong:</b> you built a <b>'+mine+'</b> lever. '+realTxt,
+    [{t:'↺ Retry this trial',c:'primary',f:()=>startTrial(G.opts)},{t:'Menu',f:openMenu}]);
+  save();
 }
 function afterClaim(){
   const cl=G.claim,quizzes=[];
@@ -632,7 +642,7 @@ function runQuiz(list,done){
     const ok=o===q.ans;if(q.recall)S.recall[q.cls][ok?'ok':'bad']++;else S.quiz[ok?'ok':'bad']++;
     const gain=q.gain||10;
     if(ok){addRep(gain);floater('+'+gain+' rep','#ffe27a',110,330);sfx.cheer()}else{sfx.bad()}
-    ui(who,ok?'✔ Correct! '+q.why:'✘ Not quite. The answer is: <b>'+q.ans+'</b>. '+q.why,'',[{t:'Continue',c:'primary',f:()=>{G.expertTarget=0;runQuiz(list,done)}}]);save()}}));
+    ui(who,ok?'✔ Correct! '+q.why:(q.recall?'✘ Not quite. The court notes your answer; let\'s see how the evidence plays out.':'✘ Not quite. The answer is: <b>'+q.ans+'</b>. '+q.why),'',[{t:'Continue',c:'primary',f:()=>{G.expertTarget=0;runQuiz(list,done)}}]);save()}}));
   ui(who,q.q,q.info||'The expert witness quizzes you before the court moves on (+10 rep for a correct answer).',acts);
 }
 function trialWon(){
@@ -700,7 +710,8 @@ function openHelp(){
   <ul><li><b>Correct lever → the effort fails → claim impossible → jury cheers.</b></li>
   <li>Wrong lever but the beam still fails → the <b>expert witness objects</b>; retry for a small reputation penalty.</li>
   <li>Wrong lever and the beam lifts the load → the jury is convinced → <b>GUILTY</b>, trial lost.</li>
-  <li>Before each demonstration the judge asks you to name the lever class and the fulcrum <b>from memory</b> (+5 rep each).</li></ul>
+  <li>Wrong lever twice in a row, even if the beam fails both times → <b>MISTRIAL</b>, trial failed.</li>
+  <li>Before each demonstration the judge asks one <b>recall question</b> (lever class or fulcrum) from memory (+5 rep).</li></ul>
   <p><b>Memory aid:</b> 1-2-3 = <b>F-L-E</b> in the middle. 1st class: fulcrum in the middle. 2nd class: load in the middle. 3rd class: effort in the middle.</p>
   <h3>Glossary</h3><dl>
   <dt>Fulcrum (axis)</dt><dd>The pivot point; in the body, the joint.</dd>
