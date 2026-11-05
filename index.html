@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#1b2233">
+<title>Lever Lawyer</title>
+<style>
+:root{--bg:#141a28;--panel:#1d2536;--ink:#f3efe4;--mute:#a9b3c7;--gold:#f2c14e;--gold2:#d49a1f;--red:#d64550;--teal:#2bb3a3;--blue:#4a7bd8;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:center}
+#stageWrap{position:relative;flex:none;aspect-ratio:1000/640;width:min(100vw,calc((100vh - 190px)*1.5625));width:min(100vw,calc((100dvh - 190px)*1.5625));background:#000}
+#cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+#hud{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;gap:6px;padding:6px;pointer-events:none}
+#hud>*{pointer-events:auto}
+#chip{background:rgba(20,26,40,.8);border:1px solid #ffffff22;border-radius:999px;padding:4px 10px;font-size:clamp(11px,2.6vw,14px);line-height:1.3;white-space:nowrap}
+#hbtns{display:flex;gap:6px}
+.hb{background:rgba(20,26,40,.8);color:var(--ink);border:1px solid #ffffff33;border-radius:999px;min-height:34px;min-width:34px;padding:0 12px;font-size:14px;cursor:pointer}
+#panel{flex:1;min-height:0;width:100%;max-width:1000px;background:var(--panel);border-top:3px solid var(--gold2);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;overflow:auto}
+#who{align-self:flex-start;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:2px 10px;border-radius:999px;background:var(--blue);color:#fff}
+#say{font-size:clamp(14px,3.6vw,18px);line-height:1.35}
+#info{font-size:clamp(12px,3vw,14px);color:var(--mute);line-height:1.35}
+#info b{color:var(--ink)}
+#acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+button.btn{background:#2c3852;color:var(--ink);border:1px solid #ffffff2a;border-radius:10px;padding:10px 14px;min-height:44px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+button.btn.primary{background:linear-gradient(#f6cd68,#d9a02a);color:#2a1d00;border-color:#b07d12}
+button.btn.good{background:#1f7a62;border-color:#2bb39a}
+button.btn.bad{background:#8a2a33;border-color:#c64b57}
+button.btn:disabled{opacity:.4;cursor:not-allowed}
+button.btn:active:not(:disabled){transform:translateY(1px)}
+@media (min-aspect-ratio:19/10){
+  #app{flex-direction:row;align-items:stretch}
+  #stageWrap{width:calc(100vh*1.5625);width:calc(100dvh*1.5625);height:100vh;height:100dvh;align-self:center}
+  #panel{max-width:none;border-top:0;border-left:3px solid var(--gold2)}
+}
+#modal{position:fixed;inset:0;background:rgba(8,10,18,.82);display:flex;align-items:center;justify-content:center;z-index:10;padding:10px}
+#modal.hidden{display:none}
+.card{background:var(--panel);border:2px solid var(--gold2);border-radius:16px;max-width:760px;width:100%;max-height:calc(100dvh - 20px);overflow:auto;padding:16px 18px;box-shadow:0 20px 60px #000a}
+.card h2{margin:0 0 6px;font-size:22px;color:var(--gold)}
+.card h3{margin:14px 0 6px;font-size:15px;color:var(--gold)}
+.card p,.card li{font-size:15px;line-height:1.45;color:var(--ink)}
+.card .sub{color:var(--mute);font-size:13px}
+.menuBtns{display:grid;gap:8px;margin-top:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tabs{display:flex;gap:6px;margin:8px 0}
+.tabs .btn{flex:1}
+.tabs .btn.on{background:var(--gold2);color:#2a1d00}
+.cust{display:flex;gap:14px;flex-wrap:wrap}
+.cust canvas{background:linear-gradient(#cdb98f,#9b7648);border-radius:12px;border:2px solid #0006;width:150px;height:188px;flex:none}
+#opts{flex:1;min-width:230px}
+.grp{margin-bottom:8px}
+.grp label{display:block;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip2{min-width:40px;min-height:38px;padding:0 10px;border-radius:10px;border:2px solid #ffffff2a;background:#2c3852;color:var(--ink);font-size:13px;cursor:pointer;font-family:inherit}
+.chip2.on{border-color:var(--gold);box-shadow:0 0 0 2px #f2c14e55}
+.sw{width:38px;height:38px;border-radius:50%;padding:0}
+.shop{display:grid;gap:8px}
+.item{display:flex;align-items:center;gap:10px;background:#2a344c;border-radius:12px;padding:8px 10px}
+.item .nm{flex:1;font-weight:600;font-size:14px}
+.item .pc{color:var(--gold);font-size:13px}
+.item .dot{width:26px;height:26px;border-radius:6px;border:2px solid #0006;flex:none}
+.bar{height:10px;background:#101624;border-radius:6px;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#2bb39a,#7ce0c6)}
+table.st{width:100%;border-collapse:collapse;font-size:14px}
+table.st td,table.st th{padding:6px 4px;text-align:left}
+dl{margin:0}dt{font-weight:700;color:var(--gold);margin-top:8px}dd{margin:2px 0 0;font-size:14.5px;line-height:1.4}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stageWrap">
+    <canvas id="cv"></canvas>
+    <div id="hud"><div id="chip"></div><div id="hbtns"><button class="hb" id="bSnd" aria-label="Sound">🔊</button><button class="hb" id="bMenu">☰ Menu</button></div></div>
+  </div>
+  <div id="panel"><div id="who"></div><div id="say"></div><div id="info"></div><div id="acts"></div></div>
+</div>
+<div id="modal" class="hidden"></div>
+
+<script>
+(()=>{
+'use strict';
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const cv=$('#cv');let c=cv.getContext('2d');
+const SW=1000,SH=640;
+const rnd=n=>Math.floor(Math.random()*n);
+const pick=a=>a[rnd(a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function shade(h,f){const n=parseInt(h.slice(1),16);let r=n>>16&255,g=n>>8&255,b=n&255;
+  if(f<1){r*=f;g*=f;b*=f}else{const k=f-1;r+=(255-r)*k;g+=(255-g)*k;b+=(255-b)*k}
+  return 'rgb('+(r|0)+','+(g|0)+','+(b|0)+')'}
+function rr(x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function circ(x,y,r){c.beginPath();c.arc(x,y,r,0,Math.PI*2)}
+function ell(x,y,rx,ry,rot){c.beginPath();c.ellipse(x,y,rx,ry,rot||0,0,Math.PI*2)}
+const ord=['','1st','2nd','3rd'];
+
+/* ================= data ================= */
+const SKINS=['#fde0c8','#f3c9a5','#e2b07e','#c68a58','#a56b3f','#8a5530','#6a3d21','#472614'];
+const HAIRC=['#1b1b1b','#4a2c17','#8a5a2b','#c9a24a','#b5361f','#8e8e94','#3b5bdb','#e64980'];
+const HAIRS=['Bald','Short','Long','Bun','Curly','Swoop'];
+const EYES=['Round','Wide','Narrow','Glasses'];
+const BROWS=['Flat','Arched','Bold'];
+const NOSES=['Dot','Line','Round'];
+const MOUTHS=['Smile','Neutral','Grin','Smirk'];
+const SUITS=[
+ {id:'drab',name:'Drab Grey Suit',cost:0,jacket:'#77736a',shirt:'#d9d5c9',tie:'#8c8470'},
+ {id:'navy',name:'Navy Suit',cost:80,jacket:'#1f3a6b',shirt:'#f1f1f1',tie:'#b3202a'},
+ {id:'pin',name:'Pinstripe Suit',cost:160,jacket:'#2b2d36',shirt:'#f1f1f1',tie:'#6b4bb8',stripe:'#9a9fb5'},
+ {id:'burg',name:'Burgundy Power Suit',cost:260,jacket:'#6b1230',shirt:'#f6efe4',tie:'#d4af37'},
+ {id:'gold',name:'Golden Counsel Suit',cost:450,jacket:'#17171c',shirt:'#ffffff',tie:'#d4af37',trim:'#e8c34f'}];
+const MATS=[
+ {id:'wood',name:'Wooden See-saw',cost:0,beam:'#a8763e',dark:'#74481f',lite:'#c4935a',w:'#8a8f99'},
+ {id:'bronze',name:'Bronze-plated See-saw',cost:120,beam:'#c8823a',dark:'#80491a',lite:'#e9a85c',w:'#c8823a'},
+ {id:'silver',name:'Silver-plated See-saw',cost:300,beam:'#c3cad6',dark:'#7d8696',lite:'#eef2f8',w:'#c3cad6'},
+ {id:'gold',name:'Gold-plated See-saw',cost:600,beam:'#f1c232',dark:'#a97a0c',lite:'#ffe27a',w:'#f1c232'}];
+
+/* Each claim is a sham: with the TRUE lever arrangement the effort torque is smaller than the load torque.
+   Teaching model: slots on the see-saw are 10 cm apart -> class 1 MA=1, class 2 MA=2, class 3 MA=0.5. */
+const CLAIMS=[
+ {id:'tiptoe',joint:'Ankle (standing on tiptoes)',cls:2,E:60,L:170,
+  say:"Your Honor, the accused stood on their tippy toes to reach the escape hatch from the vault... while carrying ALL of the gold!",
+  F:'Ball of the foot (metatarsophalangeal joint)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight (plus the gold) acting down through the ankle'},
+ {id:'biceps',joint:'Elbow (biceps curl)',cls:3,E:20,L:26,
+  say:"The evidence is clear! The accused lifted the heavy gold bar to shoulder height with one arm, hand at the end of the forearm!",
+  F:'Elbow joint',Ef:'Biceps pulling on the forearm just below the elbow',Lo:'Weight of the gold bar plus the forearm, held in the hand'},
+ {id:'neck',joint:'Neck (tilting the head back)',cls:1,E:25,L:40,
+  say:"The accused balanced a sack of gold on their forehead, then tipped the head back to peer up through the skylight!",
+  F:'Atlanto-occipital joint (skull on the top vertebra)',Ef:'Neck extensor muscles pulling on the back of the skull',Lo:'Weight of the face and the gold, in front of the joint'},
+ {id:'knee',joint:'Knee (extension / kick)',cls:3,E:40,L:60,
+  say:"The accused kicked the vault door open while wearing boots filled with gold!",
+  F:'Knee joint',Ef:'Quadriceps pulling through the patellar tendon just below the knee',Lo:'Weight of the lower leg, boot and gold at the foot'},
+ {id:'triceps',joint:'Elbow (triceps extension)',cls:1,E:30,L:50,
+  say:"The accused locked out one elbow and shoved up a hatch piled high with gold bars, using only the triceps!",
+  F:'Elbow joint',Ef:'Triceps pulling on the olecranon behind the joint',Lo:'The hatch and gold pressing down on the hand'},
+ {id:'pushup',joint:'Whole body (push-up)',cls:2,E:50,L:130,
+  say:"The accused cranked out a push-up with the whole stack of gold strapped to their back!",
+  F:'Toes touching the floor',Ef:'Triceps and chest muscles pushing through the hands',Lo:'Body weight (plus gold) acting at the centre of mass'},
+ {id:'shoulder',joint:'Shoulder (raising the arm sideways)',cls:3,E:22,L:30,
+  say:"The accused held two heavy bags of gold straight out to the sides at arm's length, like wings!",
+  F:'Shoulder (glenohumeral) joint',Ef:'Deltoid pulling on the upper arm close to the joint',Lo:'Weight of the arm and the gold bag held out in the hand'},
+ {id:'hipbal',joint:'Hip (balancing on one leg)',cls:1,E:35,L:60,
+  say:"The accused balanced on one leg on the narrow ledge, with a gold-stuffed backpack, without even wobbling!",
+  F:'Hip joint of the standing leg',Ef:'Hip abductor muscles (gluteus medius) pulling on the pelvis',Lo:'Body weight and backpack acting through the centre of mass'},
+ {id:'pushoff',joint:'Ankle (push-off from the toes)',cls:2,E:70,L:190,
+  say:"The accused launched off the toes of one foot to leap the wall, shoulders loaded with gold!",
+  F:'Ball of the foot (toes on the ground)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the gold, pressing down through the ankle'},
+ {id:'hipflex',joint:'Hip (lifting the leg)',cls:3,E:35,L:45,
+  say:"The accused swung a leg, wrapped in gold chains, up and over the wall in one smooth motion!",
+  F:'Hip joint',Ef:'Hip flexors (iliopsoas) pulling on the upper thigh',Lo:'Weight of the leg and the gold chains, centred below the knee'},
+ {id:'jaw',joint:'Jaw (clamping the teeth)',cls:3,E:30,L:40,
+  say:"The accused dangled a heavy gold bar from their mouth, clamped between the teeth, all the way across the room!",
+  F:'Temporomandibular joint (jaw hinge)',Ef:'Masseter and temporalis pulling on the jaw near the hinge',Lo:'Weight of the gold bar gripped between the teeth'},
+ {id:'rope',joint:'Elbow (hanging / climbing)',cls:3,E:30,L:20,
+  say:"The accused pulled themselves up the rope, hand over hand, with a sack of gold on one arm!",
+  F:'Elbow joint',Ef:'Biceps and brachialis pulling on the forearm near the elbow',Lo:'Body weight and the gold pulling on the hand'}
+];
+const MIDDLE={1:'Fulcrum',2:'Load',3:'Effort'};
+const CASES=['The Case of the Golden Sack','The Curious Vault Affair','The Hatch Incident','The Gilded Ladder','The Midnight Climb','The Rooftop Affair','The Lantern Lane Matter','The Marble Hall Mystery','The Brass Key Business','The Clocktower Question'];
+const SP=10; // cm between slots
+const RANKS=[[0,'Law Student'],[100,'Junior Associate'],[300,'Attorney'],[700,'Senior Counsel'],[1500,'Legendary Litigator']];
+
+/* ================= save (localStorage + cookie backup) ================= */
+const KEY='leverLawyerSave_v1';
+const DEF=()=>({created:false,look:{skin:2,hair:1,hairCol:1,eyes:0,brows:1,nose:0,mouth:0},suit:'drab',mat:'wood',
+  ownS:['drab'],ownM:['wood'],rep:0,fame:0,level:1,best:0,stats:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},quiz:{ok:0,bad:0},muted:false});
+let S=DEF();
+function load(){let s=null;
+  try{s=localStorage.getItem(KEY)}catch(e){}
+  if(!s){try{const m=document.cookie.match(new RegExp('(?:^|; )'+KEY+'=([^;]*)'));if(m)s=decodeURIComponent(m[1])}catch(e){}}
+  if(s){try{const o=JSON.parse(s);const d=DEF();S=Object.assign(d,o);S.look=Object.assign(d.look,o.look||{});S.stats=Object.assign(d.stats,o.stats||{})}catch(e){S=DEF()}}}
+function save(){const s=JSON.stringify(S);
+  try{localStorage.setItem(KEY,s)}catch(e){}
+  try{document.cookie=KEY+'='+encodeURIComponent(s)+';max-age=31536000;path=/;SameSite=Lax'}catch(e){}}
+
+/* ================= sound ================= */
+let ac=null;
+function tone(f,d,type,v,when,to){if(S.muted)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+  const t=ac.currentTime+(when||0),o=ac.createOscillator(),g=ac.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);
+  if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);g.gain.setValueAtTime(v||.12,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+const sfx={
+ place(){tone(300,.08,'triangle',.1)},
+ gavel(){tone(140,.18,'square',.18,0,60);tone(120,.2,'square',.14,.22,50)},
+ cheer(){[523,659,784,1046].forEach((f,i)=>tone(f,.18,'triangle',.1,i*.09))},
+ gasp(){tone(500,.4,'sawtooth',.07,0,200)},
+ obj(){tone(880,.12,'square',.1);tone(660,.2,'square',.1,.12)},
+ bad(){tone(200,.5,'sawtooth',.1,0,90)},
+ thud(){tone(90,.25,'sine',.25,0,40)},
+ pick(){tone(520,.05,'sine',.08)}};
+
+/* ================= faces / people ================= */
+function randLook(){return {skin:rnd(8),hair:rnd(6),hairCol:rnd(8),eyes:rnd(4),brows:rnd(3),nose:rnd(3),mouth:rnd(4)}}
+const CASUAL=['#5b7fb8','#b85b5b','#6aa36a','#c9a24a','#8a6bb0','#4f9aa0','#c77b4a','#7a7f8c'];
+function suitOf(id){return SUITS.find(s=>s.id===id)||SUITS[0]}
+function matOf(id){return MATS.find(s=>s.id===id)||MATS[0]}
+
+function hairBack(x,y,r,st,col){c.fillStyle=col;
+  if(st===2){rr(x-r*1.02,y-r*.3,r*2.04,r*2.1,r*.5);c.fill()}
+  if(st===3){circ(x,y-r*1.18,r*.42);c.fill()}
+  if(st===4){circ(x,y-r*.1,r*1.22);c.fill()}}
+function hairFront(x,y,r,st,col){if(st===0)return;c.fillStyle=col;
+  c.beginPath();c.ellipse(x,y-r*.03,r*.97,r*1.14,0,Math.PI,2*Math.PI);
+  c.bezierCurveTo(x+r*.7,y-r*.62,x-r*.5,y-r*.42,x-r*.97,y-r*.03);c.closePath();c.fill();
+  if(st===5){ell(x-r*.15,y-r*1.02,r*.72,r*.3,-.25);c.fill()}
+  if(st===1){c.fillStyle=shade(col,1.12);ell(x+r*.3,y-r*.85,r*.3,r*.1,-.5);c.fill()}}
+
+function person(x,y,r,o){
+  const L=o.look,sk=SKINS[L.skin],hc=HAIRC[L.hairCol],mood=o.mood||'',f=o.outfit||{k:'casual',color:'#667'};
+  const bottom=o.bottom||SH,sw=r*1.85,ty=y+r;
+  c.save();
+  // arms up (cheering)
+  const body=f.k==='suit'?f.jacket:f.k==='robe'?'#15151a':f.k==='coat'?'#f4f6f8':f.color;
+  if(o.arms){c.lineCap='round';c.strokeStyle=body;c.lineWidth=r*.62;
+    for(const s of[-1,1]){c.beginPath();c.moveTo(x+s*sw*.82,ty+r*.3);c.lineTo(x+s*sw*1.12,ty-r*1.0);c.stroke();
+      c.fillStyle=sk;circ(x+s*sw*1.12,ty-r*1.15,r*.3);c.fill()}}
+  // neck
+  c.fillStyle=shade(sk,.86);c.fillRect(x-r*.3,y+r*.55,r*.6,r*.7);
+  // torso
+  c.beginPath();c.moveTo(x-sw,bottom);c.lineTo(x-sw,ty+r*.55);c.quadraticCurveTo(x-sw,ty-r*.05,x-r*.5,ty-r*.08);
+  c.lineTo(x+r*.5,ty-r*.08);c.quadraticCurveTo(x+sw,ty-r*.05,x+sw,ty+r*.55);c.lineTo(x+sw,bottom);c.closePath();
+  c.fillStyle=body;c.fill();
+  if(f.k==='suit'){
+    if(f.stripe){c.save();c.clip();c.strokeStyle=f.stripe;c.lineWidth=Math.max(1,r*.04);for(let sx=x-sw;sx<x+sw;sx+=r*.28){c.beginPath();c.moveTo(sx,ty-r*.1);c.lineTo(sx,bottom);c.stroke()}c.restore()}
+    c.fillStyle=f.shirt;c.beginPath();c.moveTo(x-r*.46,ty-r*.08);c.lineTo(x+r*.46,ty-r*.08);c.lineTo(x,ty+r*1.45);c.closePath();c.fill();
+    c.fillStyle=f.tie;c.beginPath();c.moveTo(x-r*.12,ty+r*.02);c.lineTo(x+r*.12,ty+r*.02);c.lineTo(x+r*.2,ty+r*1.05);c.lineTo(x,ty+r*1.28);c.lineTo(x-r*.2,ty+r*1.05);c.closePath();c.fill();
+    c.strokeStyle=f.trim||shade(f.jacket,.7);c.lineWidth=f.trim?r*.07:r*.05;
+    c.beginPath();c.moveTo(x-r*.46,ty-r*.08);c.lineTo(x,ty+r*1.45);c.lineTo(x+r*.46,ty-r*.08);c.stroke();
+    if(f.trim){c.beginPath();c.moveTo(x-sw,ty+r*.55);c.lineTo(x-sw,bottom);c.moveTo(x+sw,ty+r*.55);c.lineTo(x+sw,bottom);c.stroke()}
+  }else if(f.k==='robe'){
+    c.fillStyle='#f5f5f0';c.beginPath();c.moveTo(x-r*.42,ty-r*.05);c.lineTo(x-r*.05,ty+r*1.1);c.lineTo(x-r*.28,ty+r*1.15);c.closePath();c.fill();
+    c.beginPath();c.moveTo(x+r*.42,ty-r*.05);c.lineTo(x+r*.05,ty+r*1.1);c.lineTo(x+r*.28,ty+r*1.15);c.closePath();c.fill();
+  }else if(f.k==='coat'){
+    c.fillStyle='#4a8fd0';c.beginPath();c.moveTo(x-r*.42,ty-r*.05);c.lineTo(x+r*.42,ty-r*.05);c.lineTo(x,ty+r*1.2);c.closePath();c.fill();
+    c.strokeStyle='#cfd6df';c.lineWidth=r*.06;c.beginPath();c.moveTo(x-r*.42,ty-r*.05);c.lineTo(x,ty+r*1.2);c.lineTo(x+r*.42,ty-r*.05);c.stroke();
+  }else{
+    c.strokeStyle=shade(body,.75);c.lineWidth=r*.08;c.beginPath();c.moveTo(x-r*.42,ty-r*.04);c.quadraticCurveTo(x,ty+r*.55,x+r*.42,ty-r*.04);c.stroke();
+  }
+  // head
+  hairBack(x,y,r,L.hair,hc);
+  c.fillStyle=shade(sk,.93);circ(x-r*.93,y+r*.08,r*.2);c.fill();circ(x+r*.93,y+r*.08,r*.2);c.fill();
+  c.fillStyle=sk;ell(x,y,r*.93,r*1.08);c.fill();
+  hairFront(x,y,r,L.hair,hc);
+  // eyes
+  const ex=r*.37,ey=y-r*.02,es=mood==='shock'?1.3:1;
+  c.lineCap='round';
+  for(const s of[-1,1]){const X=x+s*ex;
+    if(mood==='cheer'){c.strokeStyle='#222';c.lineWidth=r*.07;c.beginPath();c.arc(X,ey+r*.05,r*.15,Math.PI*1.1,Math.PI*1.9);c.stroke();continue}
+    const t=L.eyes;c.fillStyle='#fff';
+    if(t===0||t===3){ell(X,ey,r*.15*es,r*.17*es);c.fill();c.fillStyle='#1d1d22';circ(X,ey,r*.085*es);c.fill()}
+    else if(t===1){ell(X,ey,r*.2*es,r*.23*es);c.fill();c.fillStyle='#1d1d22';circ(X,ey,r*.12*es);c.fill();c.fillStyle='#fff';circ(X-r*.03,ey-r*.04,r*.035);c.fill();
+      c.strokeStyle='#222';c.lineWidth=r*.04;c.beginPath();c.moveTo(X+s*r*.17,ey-r*.14);c.lineTo(X+s*r*.27,ey-r*.2);c.stroke()}
+    else{ell(X,ey,r*.2*es,r*.085*es);c.fill();c.fillStyle='#1d1d22';circ(X,ey,r*.065*es);c.fill();c.strokeStyle='#2a2a2a';c.lineWidth=r*.04;c.beginPath();c.moveTo(X-r*.2,ey-r*.08);c.lineTo(X+r*.2,ey-r*.08);c.stroke()}}
+  // glasses
+  if(L.eyes===3){c.strokeStyle='#222';c.lineWidth=r*.055;for(const s of[-1,1]){circ(x+s*ex,ey,r*.27);c.stroke()}
+    c.beginPath();c.moveTo(x-ex+r*.27,ey);c.lineTo(x+ex-r*.27,ey);c.stroke()}
+  // brows
+  const bc=L.hair===0?shade(sk,.55):shade(hc,.8);c.strokeStyle=bc;c.lineCap='round';
+  let by=y-r*.37-(mood==='shock'?r*.12:0);
+  for(const s of[-1,1]){const X=x+s*ex;c.lineWidth=L.brows===2?r*.13:r*.07;c.beginPath();
+    if(mood==='angry'){c.moveTo(X+s*r*.2,by-r*.1);c.lineTo(X-s*r*.2,by+r*.08)}
+    else if(L.brows===1){c.moveTo(X-r*.2,by+r*.04);c.quadraticCurveTo(X,by-r*.1,X+r*.2,by+r*.04)}
+    else{c.moveTo(X-r*.2,by);c.lineTo(X+r*.2,by)}
+    c.stroke()}
+  // nose
+  c.strokeStyle=shade(sk,.7);c.fillStyle=shade(sk,.8);c.lineWidth=r*.05;
+  if(L.nose===0){ell(x,y+r*.22,r*.07,r*.05);c.fill()}
+  else if(L.nose===1){c.beginPath();c.moveTo(x-r*.02,y+r*.02);c.lineTo(x-r*.06,y+r*.26);c.lineTo(x+r*.08,y+r*.26);c.stroke()}
+  else{circ(x,y+r*.23,r*.1);c.stroke()}
+  // mouth
+  const my=y+r*.56;c.strokeStyle='#5a2a2a';c.lineWidth=r*.06;
+  let m=L.mouth;if(mood==='cheer')m=2;if(mood==='smug')m=3;
+  if(mood==='shock'){c.fillStyle='#4a1d1d';ell(x,my+r*.05,r*.13,r*.17);c.fill()}
+  else if(mood==='angry'){c.beginPath();c.arc(x,my+r*.22,r*.22,Math.PI*1.2,Math.PI*1.8);c.stroke()}
+  else if(m===0){c.beginPath();c.arc(x,my-r*.1,r*.26,Math.PI*.15,Math.PI*.85);c.stroke()}
+  else if(m===1){c.beginPath();c.moveTo(x-r*.2,my+r*.04);c.lineTo(x+r*.2,my+r*.04);c.stroke()}
+  else if(m===2){c.fillStyle='#fff';c.beginPath();c.moveTo(x-r*.3,my-r*.04);c.quadraticCurveTo(x,my+r*.38,x+r*.3,my-r*.04);c.closePath();c.fill();c.stroke()}
+  else{c.beginPath();c.moveTo(x-r*.2,my+r*.06);c.quadraticCurveTo(x+r*.05,my+r*.12,x+r*.26,my-r*.1);c.stroke()}
+  c.restore();
+}
+
+/* ================= scene state ================= */
+const G={trial:null,ci:0,claim:null,phase:'idle',hint:0,tries:0,firstTry:true,
+  cast:null,jury:[],juryMood:'idle',juryUntil:0,expertOn:0,expertTarget:0,jailed:false,
+  judgeMood:'',profMood:'',youMood:'',clientMood:'',gavelT:-9,banners:[],floaters:[],ang:0,anim:null,res:null,detail:0};
+const SLOTX=[330,500,670],BEAMY=440,TRAYY=592,TRAYX={F:360,E:500,L:640};
+const tokens={F:{id:'F',slot:-1},E:{id:'E',slot:-1},L:{id:'L',slot:-1}};
+let drag=null,sel=null;
+
+function newCast(){
+  G.cast={client:randLook(),pros:randLook(),plain:randLook(),expert:Object.assign(randLook(),{eyes:3}),judge:randLook(),
+    clientCol:pick(CASUAL),plainCol:pick(CASUAL),prosOut:{k:'suit',jacket:pick(['#3a2a2a','#2c3a2c','#3a3a52','#222']),shirt:'#eee',tie:pick(['#c33','#e8b923','#2b8f8f'])}};
+  G.jury=[];for(let i=0;i<12;i++)G.jury.push({look:randLook(),col:pick(CASUAL),ph:Math.random()*6});
+}
+
+/* ================= drawing the courtroom ================= */
+function drawBG(T){
+  // wall
+  let g=c.createLinearGradient(0,0,0,330);g.addColorStop(0,'#e4d4b0');g.addColorStop(1,'#cdb68a');c.fillStyle=g;c.fillRect(0,0,SW,330);
+  c.fillStyle='#00000012';for(let x=0;x<SW;x+=125){c.fillRect(x,0,3,330)}
+  // wainscot
+  c.fillStyle='#6b4423';c.fillRect(0,215,SW,115);c.fillStyle='#7d5230';
+  for(let x=10;x<SW;x+=125){rr(x,225,105,95,6);c.fill()}
+  c.fillStyle='#4a2d14';c.fillRect(0,212,SW,6);
+  // floor
+  for(let i=0;i<8;i++){c.fillStyle=i%2?'#9a6a3a':'#8f6032';c.fillRect(0,330+i*39,SW,39)}
+  c.fillStyle='#00000022';c.fillRect(0,330,SW,6);
+  // seal
+  c.fillStyle='#d4af37';circ(595,72,40);c.fill();c.fillStyle='#f3dc86';circ(595,72,33);c.fill();
+  c.strokeStyle='#8a6a14';c.lineWidth=3;c.beginPath();c.moveTo(595,48);c.lineTo(595,96);c.moveTo(572,58);c.lineTo(618,58);
+  c.moveTo(572,58);c.lineTo(564,76);c.lineTo(580,76);c.closePath();c.moveTo(618,58);c.lineTo(610,76);c.lineTo(626,76);c.closePath();c.stroke();
+  // windows
+  for(const x of[510,690]){c.fillStyle='#8fc4e8';rr(x-0,18,0,0,0)}
+}
+function drawJury(T){
+  // box back
+  c.fillStyle='#5a3a1c';rr(24,100,462,200,10);c.fill();c.fillStyle='#3d2711';c.fillRect(30,205,450,6);
+  const mo=G.juryMood;
+  for(let i=0;i<12;i++){const j=G.jury[i],row=i<6?0:1,k=i%6;
+    const bx=row?66+k*72:102+k*72,by=row?182:132;
+    let dx=0,dy=0,mood='',arms=0;
+    if(mo==='cheer'){dy=-Math.abs(Math.sin(T*8+j.ph))*9;mood='cheer';arms=1}
+    else if(mo==='gasp'){dx=Math.sin(T*34+j.ph)*1.6;dy=-3;mood='shock'}
+    else{dy=Math.sin(T*1.3+j.ph)*1.2}
+    c.save();c.beginPath();c.rect(24,100,462,row?132:106);c.clip();
+    person(bx+dx,by+dy,19,{look:j.look,mood,arms,outfit:{k:'casual',color:j.col},bottom:row?232:206});c.restore();
+    if(row===0&&k===5){} }
+  // front barrier
+  c.fillStyle='#6b4423';rr(20,230,470,74,8);c.fill();c.fillStyle='#8a5a30';rr(28,238,454,10,4);c.fill();
+  c.fillStyle='#d4af37';rr(210,262,90,22,4);c.fill();c.fillStyle='#3a2506';c.font='bold 16px system-ui';c.textAlign='center';c.fillText('JURY',255,279);
+}
+function drawBench(T){
+  // judge
+  const jm=G.judgeMood;
+  person(840,132,40,{look:G.cast.judge,mood:jm,outfit:{k:'robe'},bottom:218});
+  c.fillStyle='#4a2a12';rr(692,210,296,130,8);c.fill();c.fillStyle='#6b4423';rr(700,218,280,112,6);c.fill();
+  c.fillStyle='#8a5a30';rr(684,204,312,14,5);c.fill();
+  c.fillStyle='#d4af37';rr(808,248,64,24,4);c.fill();c.fillStyle='#3a2506';c.font='bold 15px system-ui';c.textAlign='center';c.fillText('JUDGE',840,266);
+  // gavel
+  const gt=T-G.gavelT,sw=gt>=0&&gt<.5?Math.sin(gt/.5*Math.PI)*-1.0:0;
+  c.save();c.translate(742,204);c.rotate(sw);c.fillStyle='#8a5a30';c.fillRect(-3,-30,6,32);c.fillStyle='#5a3515';rr(-16,-40,32,14,3);c.fill();c.restore();
+  c.fillStyle='#3d2711';rr(722,200,40,8,3);c.fill();
+}
+function drawWitness(T){
+  G.expertOn+=(G.expertTarget-G.expertOn)*.12;
+  const a=G.expertOn;
+  if(a>.02){c.save();c.globalAlpha=Math.min(1,a*1.4);
+    c.beginPath();c.rect(500,100,200,200);c.clip();
+    person(598,196+(1-a)*60,30,{look:G.cast.expert,mood:G.profMood==='x'?'':'',outfit:{k:'coat'},bottom:272});c.restore()}
+  c.fillStyle='#5a3a1c';rr(516,246,164,70,6);c.fill();c.fillStyle='#8a5a30';rr(508,240,180,12,4);c.fill();
+  c.fillStyle='#d4af37';rr(566,272,64,20,4);c.fill();c.fillStyle='#3a2506';c.font='bold 13px system-ui';c.textAlign='center';c.fillText('EXPERT',598,287);
+}
+function drawFolks(T){
+  const b=Math.sin(T*1.7)*1.5;
+  // plaintiff (behind prosecutor)
+  person(775,458+b,30,{look:G.cast.plain,mood:G.profMood==='win'?'smug':'',outfit:{k:'casual',color:G.cast.plainCol}});
+  person(880,430+b,44,{look:G.cast.pros,mood:G.profMood,outfit:G.cast.prosOut});
+  // lawyer
+  const su=suitOf(S.suit);
+  person(110,430-b,44,{look:S.look,mood:G.youMood,outfit:Object.assign({k:'suit'},su)});
+  // client
+  person(218,460+b,30,{look:G.cast.client,mood:G.clientMood,outfit:{k:'casual',color:G.cast.clientCol}});
+  if(G.jailed){c.fillStyle='#1b1b1fcc';rr(180,415,78,225,4);c.fill();c.strokeStyle='#888';c.lineWidth=5;for(let x=190;x<256;x+=15){c.beginPath();c.moveTo(x,415);c.lineTo(x,640);c.stroke()}
+    c.fillStyle='#fff';c.font='bold 13px system-ui';c.textAlign='center';c.fillText('JAILED',219,436)}
+  // name tags
+  c.font='bold 13px system-ui';c.textAlign='center';c.fillStyle='#ffffffcc';
+  c.fillText('YOU',110,360);c.fillText('CLIENT',218,404);c.fillText('PLAINTIFF',775,414);c.fillText('PROSECUTOR',880,360);
+}
+/* beam + tokens */
+function tokenCenter(t){
+  if(drag&&drag.t===t)return{x:drag.x,y:drag.y};
+  if(t.slot>=0){return{x:SLOTX[t.slot],y:t.id==='F'?BEAMY+50:BEAMY-46}}
+  return{x:TRAYX[t.id],y:TRAYY}}
+function drawTokenDisc(id,x,y,m,hl){
+  const R=42;c.save();
+  c.fillStyle='#00000040';ell(x+3,y+R-6,R*.9,R*.3);c.fill();
+  c.fillStyle=id==='F'?'#4a6fa8':id==='E'?'#cf4a4a':'#d9a622';
+  circ(x,y,R);c.fill();c.lineWidth=5;c.strokeStyle=m.dark;c.stroke();c.lineWidth=2;c.strokeStyle=m.lite;circ(x,y,R-6);c.stroke();
+  if(hl){c.lineWidth=4;c.strokeStyle='#fff';c.setLineDash([8,6]);circ(x,y,R+7);c.stroke();c.setLineDash([])}
+  c.fillStyle='#fff';c.font='bold 34px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText(id,x,y+2);
+  c.font='bold 11px system-ui';c.fillStyle='#ffffffdd';c.fillText(id==='F'?'FULCRUM':id==='E'?'EFFORT':'LOAD',x,y+R-11);
+  c.restore();c.textBaseline='alphabetic'}
+function drawFulcrum(x,top,m){ // static triangle under pivot
+  c.fillStyle=m.beam;c.strokeStyle=m.dark;c.lineWidth=5;c.beginPath();c.moveTo(x,top);c.lineTo(x+46,520);c.lineTo(x-46,520);c.closePath();c.fill();c.stroke();
+  c.fillStyle='#fff';c.font='bold 30px system-ui';c.textAlign='center';c.fillText('F',x,top+48)}
+function drawPlacedEL(t,m,x,dirDown){
+  const y=BEAMY-46,R=40;
+  c.fillStyle='#00000030';ell(x,BEAMY-4,34,7);c.fill();
+  if(t.id==='L'){ // gold sack
+    c.fillStyle='#d9a622';c.strokeStyle=m.dark;c.lineWidth=5;
+    c.beginPath();c.moveTo(x-16,y-34);c.quadraticCurveTo(x-48,y-2,x-38,BEAMY-6);c.lineTo(x+38,BEAMY-6);c.quadraticCurveTo(x+48,y-2,x+16,y-34);c.closePath();c.fill();c.stroke();
+    c.fillStyle=m.dark;rr(x-18,y-40,36,12,5);c.fill();
+    c.fillStyle='#fff';c.font='bold 32px system-ui';c.textAlign='center';c.fillText('L',x,y+14);
+  }else{ // effort disc with arrow
+    c.fillStyle='#cf4a4a';circ(x,y,R);c.fill();c.lineWidth=5;c.strokeStyle=m.dark;c.stroke();
+    c.fillStyle='#fff';c.font='bold 30px system-ui';c.textAlign='center';c.fillText('E',x,y+11);
+    c.strokeStyle='#ffd0d0';c.fillStyle='#ffd0d0';c.lineWidth=7;c.lineCap='round';
+    if(dirDown){c.beginPath();c.moveTo(x,y-70);c.lineTo(x,y-46);c.stroke();c.beginPath();c.moveTo(x-12,y-48);c.lineTo(x,y-38);c.lineTo(x+12,y-48);c.closePath();c.fill()}
+    else{c.beginPath();c.moveTo(x,y+60);c.lineTo(x,y+60);c.stroke()}
+  }}
+function drawSeesaw(T){
+  const m=matOf(S.mat);
+  // stand platform
+  c.fillStyle='#4a2d14';rr(240,520,520,26,6);c.fill();c.fillStyle='#6b4423';rr(240,520,520,8,4);c.fill();
+  // evidence tray
+  c.fillStyle='#2a1c0e';rr(300,548,400,88,14);c.fill();c.fillStyle='#ffffff18';c.font='bold 11px system-ui';c.textAlign='center';c.fillText('EVIDENCE TRAY — drag or tap tokens onto the see-saw',500,562);
+  const iF=tokens.F.slot,pivX=iF>=0?SLOTX[iF]:500;
+  if(iF>=0)drawFulcrum(pivX,BEAMY+22,m);
+  // slot guides (static)
+  for(let i=0;i<3;i++){c.strokeStyle='#ffffff66';c.lineWidth=3;c.setLineDash([6,6]);circ(SLOTX[i],BEAMY-46,44);c.stroke();c.setLineDash([]);
+    c.fillStyle='#ffffff88';c.font='bold 14px system-ui';c.textAlign='center';c.fillText(String(i+1),SLOTX[i],BEAMY-100)}
+  // rotating beam
+  c.save();c.translate(pivX,BEAMY+10);c.rotate(G.ang);c.translate(-pivX,-(BEAMY+10));
+  const gr=c.createLinearGradient(0,BEAMY,0,BEAMY+22);gr.addColorStop(0,m.lite);gr.addColorStop(.35,m.beam);gr.addColorStop(1,m.dark);
+  c.fillStyle=gr;rr(262,BEAMY,476,22,6);c.fill();c.strokeStyle=m.dark;c.lineWidth=3;c.stroke();
+  c.strokeStyle='#00000025';c.lineWidth=1;for(let i=0;i<7;i++){c.beginPath();c.moveTo(270+i*20,BEAMY+7+(i%3)*5);c.lineTo(330+i*58,BEAMY+7+(i%3)*5);c.stroke()}
+  for(let i=0;i<3;i++){c.fillStyle=m.dark;circ(SLOTX[i],BEAMY+11,5);c.fill()}
+  // numbers along beam
+  if(G.detail>=1&&G.claim){c.fillStyle='#fff';c.font='bold 13px system-ui';c.textAlign='center';c.fillText(SP+' cm',(SLOTX[0]+SLOTX[1])/2,BEAMY+38);c.fillText(SP+' cm',(SLOTX[1]+SLOTX[2])/2,BEAMY+38)}
+  const iE=tokens.E.slot;
+  for(const id of['L','E']){const t=tokens[id];if(t.slot<0||(drag&&drag.t===t))continue;
+    const down=iE>=0&&iF>=0&&((iE-iF)*(tokens.L.slot-iF)<0);
+    drawPlacedEL(t,m,SLOTX[t.slot],down)}
+  // value tags
+  if(G.detail>=1&&G.claim){c.font='bold 15px system-ui';c.textAlign='center';
+    if(tokens.E.slot>=0&&!(drag&&drag.t===tokens.E)){c.fillStyle='#ffe3e3';c.fillText(G.claim.E+' kgf',SLOTX[tokens.E.slot],BEAMY-100+0)}
+    if(tokens.L.slot>=0&&!(drag&&drag.t===tokens.L)){c.fillStyle='#ffeaa0';c.fillText(G.claim.L+' kgf',SLOTX[tokens.L.slot],BEAMY-100+0)}}
+  c.restore();
+  // tray + dragged tokens
+  for(const id of['F','E','L']){const t=tokens[id];if(t.slot<0||(drag&&drag.t===t)){
+    if(drag&&drag.t===t)continue;const p=tokenCenter(t);drawTokenDisc(id,p.x,p.y,m,sel===t)}}
+  if(drag){drawTokenDisc(drag.t.id,drag.x,drag.y-10,m,false)}
+  // selected in slot highlight
+  if(sel&&sel.slot>=0&&!drag){const p=tokenCenter(sel);c.strokeStyle='#fff';c.lineWidth=4;c.setLineDash([8,6]);circ(p.x,p.y,50);c.stroke();c.setLineDash([])}
+}
+function drawFX(T){
+  // banners
+  G.banners=G.banners.filter(b=>T-b.t0<b.dur);
+  for(const b of G.banners){const k=(T-b.t0)/b.dur,s=k<.15?.4+k/.15*.75:1.15-(k-.15)*.15,a=k>.8?(1-k)/.2:1;
+    c.save();c.globalAlpha=a;c.translate(500,300);c.scale(s,s);c.rotate(b.rot||0);
+    c.font='900 76px system-ui';c.textAlign='center';c.lineWidth=12;c.strokeStyle='#000b';c.strokeText(b.text,0,0);c.fillStyle=b.color;c.fillText(b.text,0,0);
+    if(b.sub){c.font='bold 26px system-ui';c.lineWidth=7;c.strokeText(b.sub,0,44);c.fillStyle='#fff';c.fillText(b.sub,0,44)}c.restore()}
+  G.floaters=G.floaters.filter(f=>T-f.t0<1.6);
+  for(const f of G.floaters){const k=(T-f.t0)/1.6;c.save();c.globalAlpha=1-k;c.font='bold 34px system-ui';c.textAlign='center';c.lineWidth=6;c.strokeStyle='#000a';
+    c.strokeText(f.text,f.x,f.y-k*60);c.fillStyle=f.color;c.fillText(f.text,f.x,f.y-k*60);c.restore()}
+}
+function banner(text,color,sub,dur,rot){G.banners.push({text,color,sub,dur:dur||1.8,t0:performance.now()/1000,rot})}
+function floater(text,color,x,y){G.floaters.push({text,color:color||'#fff',x:x||110,y:y||330,t0:performance.now()/1000})}
+
+/* ================= main loop ================= */
+function resize(){const r=cv.getBoundingClientRect();const d=Math.min(window.devicePixelRatio||1,2.5);cv.width=Math.max(2,Math.round(r.width*d));cv.height=Math.max(2,Math.round(r.height*d))}
+function frame(){
+  const T=performance.now()/1000;
+  if(G.juryMood!=='idle'&&T>G.juryUntil)G.juryMood='idle';
+  // beam animation
+  if(G.anim){const a=G.anim,k=(T-a.t0)/a.dur;
+    if(a.lift){G.ang=a.dir*a.target*Math.min(1,Math.sin(Math.min(1,k/.55)*Math.PI/2))}
+    else{G.ang=a.dir*.05*Math.abs(Math.sin(k*Math.PI*3))*(1-k)}
+    if(k>=1){G.ang=a.lift?a.dir*a.target:0;const cb=a.done;G.anim=null;cb&&cb()}}
+  c.setTransform(cv.width/SW,0,0,cv.height/SH,0,0);
+  c.clearRect(0,0,SW,SH);
+  drawBG(T);drawJury(T);drawBench(T);drawWitness(T);drawFolks(T);drawSeesaw(T);drawFX(T);
+  requestAnimationFrame(frame);
+}
+
+/* ================= panel UI ================= */
+const $who=$('#who'),$say=$('#say'),$info=$('#info'),$acts=$('#acts');
+const WHO={Judge:'#6b4a1e',Prosecutor:'#b23a48',Expert:'#1f8f84',You:'#3f6fc7',Court:'#555'};
+function ui(who,text,info,acts){
+  $who.textContent=who;$who.style.background=WHO[who]||'#3f6fc7';$say.innerHTML=text;$info.innerHTML=info||'';$acts.innerHTML='';
+  (acts||[]).forEach(a=>{const b=document.createElement('button');b.className='btn '+(a.c||'');b.textContent=a.t;b.disabled=!!a.dis;b.onclick=()=>{sfx.pick();a.f()};$acts.appendChild(b)});
+}
+function rankOf(){let r=RANKS[0][1];for(const[x,n]of RANKS)if(S.fame>=x)r=n;return r}
+function hud(){$('#chip').innerHTML='⚖ '+rankOf()+' · ⭐ <b>'+S.rep+'</b> · Trial '+S.level;$('#bSnd').textContent=S.muted?'🔇':'🔊'}
+function addRep(n){S.rep=Math.max(0,S.rep+n);if(n>0)S.fame+=n;save();hud()}
+
+/* ================= trial flow ================= */
+function pickClaims(level){
+  const by=id=>CLAIMS.find(x=>x.id===id);
+  if(level===1)return[by('tiptoe')];
+  if(level===2)return[by('biceps')];
+  if(level===3)return[by('neck'),by('knee')];
+  const n=[1,1,2,2,3,3,3,4][Math.min(level-1,7)];
+  const used=new Set(),out=[];let classes=shuffle([1,2,3]);
+  for(let i=0;i<n;i++){const cl=classes[i%3];const pool=shuffle(CLAIMS.filter(x=>x.cls===cl&&!used.has(x.id)));
+    const cl2=pool[0]||pick(CLAIMS.filter(x=>!used.has(x.id)));used.add(cl2.id);out.push(cl2)}
+  return out;
+}
+function startTrial(){
+  closeModal();newCast();
+  const lv=S.level,detail=lv<=2?0:lv<=4?1:2;
+  G.detail=detail;G.trial={level:lv,claims:pickClaims(lv),idx:0,title:pick(CASES),detail};
+  G.jailed=false;G.clientMood='';G.youMood='';G.profMood='';G.judgeMood='';G.expertTarget=0;G.ang=0;G.anim=null;G.res=null;G.claim=null;
+  resetTokens();G.phase='intro';
+  const n=G.trial.claims.length;
+  ui('Judge','All rise! Court is in session for <b>'+G.trial.title+'</b>. The prosecution will make '+(n===1?'<b>one claim</b>':'<b>'+n+' claims</b>')+' about what the human body can do. Defense, you must show the jury each one is physically impossible.',
+    'Trial '+lv+(detail===0?' · Concept round: no numbers yet.':detail===1?' · Numbers round: compare torques.':' · Expert round: numbers plus witness questions.'),
+    [{t:'Begin',c:'primary',f:()=>{sfx.gavel();G.gavelT=performance.now()/1000;showClaim()}},{t:'Skip to menu',f:openMenu}]);
+}
+function resetTokens(){for(const k in tokens)tokens[k].slot=-1;sel=null;drag=null;G.ang=0}
+function showClaim(){
+  const tr=G.trial;G.claim=tr.claims[tr.idx];G.phase='arrange';G.hint=0;G.tries=0;G.firstTry=true;G.expertTarget=0;G.ang=0;G.anim=null;
+  G.profMood='smug';G.youMood='';G.juryMood='idle';resetTokens();refreshArrange('<i>Claim '+(tr.idx+1)+' of '+tr.claims.length+'</i><br>');
+}
+function infoLine(){
+  const cl=G.claim,d=G.detail;
+  let s='Build the <b>'+cl.joint+'</b> lever: place <b>F</b>ulcrum, <b>E</b>ffort and <b>L</b>oad on the see-saw.';
+  if(d>=1)s+=' <b>Effort available: '+cl.E+' kgf · Load: '+cl.L+' kgf</b> · slots are '+SP+' cm apart.';
+  return s}
+function refreshArrange(pre){
+  if(G.phase!=='arrange')return;
+  const all=tokens.F.slot>=0&&tokens.E.slot>=0&&tokens.L.slot>=0;
+  let info=infoLine();
+  if(G.hint>=1)info+='<br>💡 <b>Anatomy:</b> Fulcrum = '+G.claim.F+'. Effort = '+G.claim.Ef+'. Load = '+G.claim.Lo+'.';
+  if(G.hint>=2)info+='<br>💡 <b>Memory aid:</b> 1-2-3 = F-L-E in the middle. Here, the <b>'+MIDDLE[G.claim.cls]+'</b> goes in the middle slot.';
+  const acts=[{t:all?'⚖ Present to the jury':'Place all 3 tokens…',c:'primary',dis:!all,f:present}];
+  if(G.hint<2)acts.push({t:'💡 Hint (−'+(G.hint?15:8)+' rep)',f:()=>{if(S.rep<(G.hint?15:8)&&false)return;addRep(-(G.hint?15:8));floater('−'+(G.hint?15:8),'#ffb3b3');G.hint++;refreshArrange()}});
+  acts.push({t:'↺ Clear',f:()=>{resetTokens();refreshArrange()}});
+  ui('Prosecutor',(pre||'')+'“'+G.claim.say+'”',info,acts);
+}
+function evaluate(){
+  const iF=tokens.F.slot,iE=tokens.E.slot,iL=tokens.L.slot,cl=iF===1?1:iL===1?2:3,cur=G.claim;
+  const dE=Math.abs(iE-iF)*SP,dL=Math.abs(iL-iF)*SP,tE=cur.E*dE,tL=cur.L*dL;
+  return{cl,dE,dL,tE,tL,lifted:tE>tL,correct:cl===cur.cls,ma:dE/dL,iF,iE,iL};
+}
+function present(){
+  if(G.phase!=='arrange')return;
+  const r=evaluate();G.res=r;G.phase='anim';G.tries++;
+  const dir=SLOTX[r.iL]<SLOTX[r.iF]?1:-1;
+  ui('You','Members of the jury, observe the demonstration…','',[]);
+  G.anim={t0:performance.now()/1000,dur:r.lifted?2.0:1.8,lift:r.lifted,dir,target:.2,done:()=>{if(!r.lifted)sfx.thud();setTimeout(()=>outcome(r),r.lifted?500:350)}};
+}
+function torqueTxt(r){return 'Effort torque = '+G.claim.E+' × '+r.dE+' cm = <b>'+r.tE+'</b> · Load torque = '+G.claim.L+' × '+r.dL+' cm = <b>'+r.tL+'</b> kgf·cm.'}
+function outcome(r){
+  const cl=G.claim,st=S.stats[cl.cls];
+  const mine=ord[r.cl]+'-class (MA = '+(r.ma===.5?'0.5':r.ma)+')',real=ord[cl.cls]+'-class';
+  const realTxt='The '+cl.joint.toLowerCase()+' is a <b>'+real+' lever</b>: Fulcrum = '+cl.F+'; Effort = '+cl.Ef+'; Load = '+cl.Lo+'. The <b>'+MIDDLE[cl.cls]+'</b> sits in the middle.';
+  if(r.correct){
+    st.ok++;G.phase='won-claim';G.juryMood='cheer';G.juryUntil=performance.now()/1000+2.6;G.profMood='angry';G.youMood='cheer';G.clientMood='cheer';sfx.cheer();
+    banner('IMPOSSIBLE!','#7cf0b8','The claim fails',1.7);
+    const gain=G.firstTry?25:15;addRep(gain);floater('+'+gain+' rep','#ffe27a',110,330);
+    ui('You','The see-saw proves it: the <b>'+real+' lever</b> cannot do what the prosecution claims. '+(G.detail>=1?torqueTxt(r)+' The effort loses, so the claim is <b>physically impossible</b>.':'The effort cannot overcome the load, so the claim is <b>physically impossible</b>!'),realTxt,[{t:'Continue',c:'primary',f:()=>afterClaim()}]);
+  }else if(!r.lifted){
+    st.bad++;G.firstTry=false;G.phase='expert';G.expertTarget=1;G.profMood='';G.youMood='shock';G.juryMood='gasp';G.juryUntil=performance.now()/1000+1.2;sfx.obj();
+    banner('OBJECTION!','#ffd45a','Expert witness',1.6,-.06);addRep(-10);floater('−10 rep','#ffb3b3',110,330);
+    ui('Expert','“Your Honor, the defense got <b>lucky</b>! Their see-saw looks like a <b>'+mine+'</b> lever, but that is not how the body works. '+realTxt+'”',
+      '“The verdict would be thrown out because the model is wrong. Rebuild it correctly.” '+(G.detail>=1?'(Your model: '+torqueTxt(r)+')':''),
+      [{t:'↺ Try again',c:'primary',f:()=>{G.expertTarget=0;G.youMood='';G.phase='arrange';resetTokens();refreshArrange()}}]);
+  }else{
+    st.bad++;G.phase='lost';G.jailed=true;G.juryMood='gasp';G.juryUntil=performance.now()/1000+3;G.judgeMood='angry';G.profMood='smug';G.youMood='shock';G.clientMood='shock';G.gavelT=performance.now()/1000;sfx.gavel();sfx.gasp();
+    banner('GUILTY!','#ff6b6b','Your client goes to jail',2.4);
+    ui('Judge','The jury watched the load rise! Your model made the effort look strong enough, so the verdict is <b>GUILTY</b>. Your client is taken away. Trial lost.',
+      '<b>What went wrong:</b> you built a <b>'+mine+'</b> lever, which exaggerated the effort. '+(G.detail>=1?torqueTxt(r)+' ':'')+realTxt,
+      [{t:'↺ Retry this trial',c:'primary',f:()=>{startTrial()}},{t:'Menu',f:openMenu}]);
+    save();
+  }
+}
+function afterClaim(){
+  const cl=G.claim,quizzes=[];
+  if(G.detail>=1)quizzes.push(anatomyQ(cl));
+  if(G.detail>=2)quizzes.push(maQ(cl));
+  runQuiz(quizzes,()=>{const tr=G.trial;tr.idx++;if(tr.idx>=tr.claims.length)trialWon();else{G.expertTarget=0;showClaim()}});
+}
+function anatomyQ(cl){
+  const roles=[['F','Fulcrum (axis)','F'],['E','Effort','Ef'],['L','Load (resistance)','Lo']],ro=pick(roles);
+  const others=shuffle(CLAIMS.filter(x=>x[ro[2]]!==cl[ro[2]]&&x.id!==cl.id));const seen=new Set([cl[ro[2]]]),opts=[cl[ro[2]]];
+  for(const o of others){if(!seen.has(o[ro[2]])&&opts.length<3){seen.add(o[ro[2]]);opts.push(o[ro[2]])}}
+  return{q:'In the <b>'+cl.joint+'</b> lever, which is the <b>'+ro[1]+'</b>?',opts:shuffle(opts),ans:cl[ro[2]],why:''};
+}
+function maQ(cl){
+  const o=['MA is always greater than 1 (force advantage)','MA is always less than 1 (speed / range advantage)','MA is always equal to 1','MA can be less than, equal to or greater than 1'];
+  const ans=cl.cls===2?o[0]:cl.cls===3?o[1]:o[3];
+  const why=cl.cls===2?'In a 2nd-class lever the effort arm is always longer than the load arm, so MA &gt; 1.':cl.cls===3?'In a 3rd-class lever the effort arm is always shorter than the load arm, so MA &lt; 1: it trades force for speed and range of motion.':'In a 1st-class lever it depends on where the fulcrum sits, so MA can be &lt;, = or &gt; 1.';
+  return{q:'<b>Expert question:</b> mechanical advantage = effort arm ÷ load arm. For a <b>'+ord[cl.cls]+'-class</b> lever like the '+cl.joint+', which statement is true?',opts:shuffle(o),ans,why};
+}
+function runQuiz(list,done){
+  if(!list.length)return done();
+  const q=list.shift();G.expertTarget=1;G.phase='quiz';
+  const acts=q.opts.map(o=>({t:o,f:()=>{
+    const ok=o===q.ans;S.quiz[ok?'ok':'bad']++;
+    if(ok){addRep(10);floater('+10 rep','#ffe27a',110,330);sfx.cheer()}else{sfx.bad()}
+    ui('Expert',ok?'✔ Correct! '+q.why:'✘ Not quite. The answer is: <b>'+q.ans+'</b>. '+q.why,'',[{t:'Continue',c:'primary',f:()=>{G.expertTarget=0;runQuiz(list,done)}}]);save()}}));
+  ui('Expert',q.q,'The expert witness quizzes you before the court moves on (+10 rep for a correct answer).',acts);
+}
+function trialWon(){
+  const tr=G.trial,bonus=40+10*tr.level;addRep(bonus);S.best=Math.max(S.best,tr.level);S.level=tr.level+1;save();hud();
+  G.phase='won';G.juryMood='cheer';G.juryUntil=performance.now()/1000+4;G.youMood='cheer';G.clientMood='cheer';G.profMood='angry';G.judgeMood='';G.gavelT=performance.now()/1000;sfx.gavel();setTimeout(sfx.cheer,300);
+  banner('NOT GUILTY!','#7cf0b8','Case dismissed',2.4);floater('+'+bonus+' rep','#ffe27a',110,330);
+  ui('Judge','The jury has seen the physics. <b>Not guilty</b>; the case is dismissed! You earned <b>'+bonus+' reputation</b>.',
+    'Spend reputation on new suits and see-saws in the shop. Next up: Trial '+S.level+' ('+(S.level<3?'1':[0,0,0,'2','2','3','3','3'][Math.min(S.level,7)]||'4')+' claim'+(S.level<3?'':'s')+').',
+    [{t:'Next trial ▶',c:'primary',f:startTrial},{t:'🛍 Shop & style',f:()=>openCustomize(false)},{t:'Menu',f:openMenu}]);
+}
+
+/* ================= input (drag / tap) ================= */
+function toStage(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*SW,y:(e.clientY-r.top)/r.height*SH}}
+function hitToken(p){let best=null,bd=1e9;for(const id of['L','E','F']){const t=tokens[id],q=tokenCenter(t),d=Math.hypot(p.x-q.x,p.y-q.y);if(d<62&&d<bd){bd=d;best=t}}return best}
+function nearSlot(p){let b=-1,bd=1e9;for(let i=0;i<3;i++){const d=Math.hypot(p.x-SLOTX[i],p.y-(BEAMY-20));if(d<125&&d<bd){bd=d;b=i}}return b}
+function placeInto(t,slot){
+  const old=t.slot;const other=Object.values(tokens).find(o=>o!==t&&o.slot===slot);
+  if(other)other.slot=old;t.slot=slot;sfx.place();refreshArrange();
+}
+cv.addEventListener('pointerdown',e=>{
+  if(G.phase!=='arrange')return;
+  const p=toStage(e),t=hitToken(p);
+  if(t){cv.setPointerCapture(e.pointerId);drag={t,x:p.x,y:p.y,sx:p.x,sy:p.y,t0:performance.now(),moved:false};e.preventDefault()}
+  else if(sel){const s=nearSlot(p);if(s>=0){placeInto(sel,s);sel=null}else sel=null}
+});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const p=toStage(e);drag.x=p.x;drag.y=p.y;if(Math.hypot(p.x-drag.sx,p.y-drag.sy)>14)drag.moved=true;e.preventDefault()});
+function endDrag(e,cancel){
+  if(!drag)return;const d=drag;drag=null;const p=toStage(e);
+  if(cancel)return;
+  if(!d.moved){ // tap
+    if(sel===d.t)sel=null;else if(sel&&sel!==d.t){ // tap another token: swap positions
+      const a=sel,b=d.t,sa=a.slot;a.slot=b.slot;b.slot=sa;sel=null;sfx.place();refreshArrange()}
+    else sel=d.t;
+    sfx.pick();return}
+  const s=nearSlot(p);
+  if(s>=0)placeInto(d.t,s);else{d.t.slot=-1;refreshArrange()}
+  sel=null;
+}
+cv.addEventListener('pointerup',e=>endDrag(e,false));
+cv.addEventListener('pointercancel',e=>endDrag(e,true));
+
+/* ================= modals ================= */
+const $modal=$('#modal');
+function openModal(html){$modal.innerHTML='<div class="card">'+html+'</div>';$modal.classList.remove('hidden');return $modal.firstChild}
+function closeModal(){$modal.classList.add('hidden');$modal.innerHTML=''}
+function btn(label,cls,fn){const b=document.createElement('button');b.className='btn '+(cls||'');b.textContent=label;b.onclick=()=>{sfx.pick();fn()};return b}
+
+function openMenu(){
+  const inTrial=G.phase==='arrange'||G.phase==='expert'||G.phase==='quiz';
+  const card=openModal('<h2>⚖ Lever Lawyer</h2><p class="sub">Defend your client by proving the prosecution\'s claims are physically impossible, using the levers of the human body.</p><div class="menuBtns"></div>');
+  const m=card.querySelector('.menuBtns');
+  if(inTrial)m.appendChild(btn('▶ Resume trial','primary',closeModal));
+  m.appendChild(btn(inTrial?'↺ Restart this trial':'▶ Start Trial '+S.level,inTrial?'':'primary',startTrial));
+  m.appendChild(btn('🎨 Customize lawyer & shop','',()=>openCustomize(false)));
+  m.appendChild(btn('📁 Case file (progress)','',openStats));
+  m.appendChild(btn('📖 How to play & glossary','',openHelp));
+  card.insertAdjacentHTML('beforeend','<p class="sub" style="margin-top:12px">Progress is saved automatically in this browser (localStorage + cookie).</p>');
+}
+function openHelp(){
+  const card=openModal(`<h2>How to play</h2>
+  <p>The prosecutor makes a claim about what a body part can do. Build that joint as a <b>see-saw lever</b>: drag <b>F</b> (fulcrum), <b>E</b> (effort) and <b>L</b> (load) onto the three slots (or tap a token, then tap a slot), then <b>Present to the jury</b>.</p>
+  <ul><li><b>Correct lever → the effort fails → claim impossible → jury cheers.</b></li>
+  <li>Wrong lever but the beam still fails → the <b>expert witness objects</b>; retry for a small reputation penalty.</li>
+  <li>Wrong lever and the beam lifts the load → the jury is convinced → <b>GUILTY</b>, trial lost.</li></ul>
+  <p><b>Memory aid:</b> 1-2-3 = <b>F-L-E</b> in the middle. 1st class: fulcrum in the middle. 2nd class: load in the middle. 3rd class: effort in the middle.</p>
+  <h3>Glossary</h3><dl>
+  <dt>Fulcrum (axis)</dt><dd>The pivot point; in the body, the joint.</dd>
+  <dt>Effort (force)</dt><dd>The force applied, in the body usually a muscle pulling through its tendon.</dd>
+  <dt>Load (resistance)</dt><dd>What is being moved: body segment, object or body weight.</dd>
+  <dt>Effort arm / Load arm</dt><dd>Perpendicular distance from the fulcrum to the effort / to the load.</dd>
+  <dt>Torque</dt><dd>Force × arm distance. A lever lifts the load only if effort torque &gt; load torque.</dd>
+  <dt>Mechanical advantage (MA)</dt><dd>Effort arm ÷ load arm. MA &gt; 1 gives a force advantage; MA &lt; 1 gives speed and range of motion.</dd>
+  <dt>1st / 2nd / 3rd class</dt><dd>1st: MA can be &lt;, = or &gt; 1 (neck, triceps). 2nd: MA &gt; 1 (calf raise, push-up). 3rd: MA &lt; 1 (biceps curl, knee extension); most joints in the body.</dd></dl>
+  <p class="sub">Teaching model: slots are 10 cm apart, so 1st class has equal arms, 2nd class MA = 2 and 3rd class MA = 0.5. Real muscle attachments are usually even closer to the joint.</p>
+  <h3>Hints</h3><p>A hint costs reputation: the first tells you the anatomy, the second tells you which token goes in the middle.</p>
+  <div class="row"></div>`);
+  card.querySelector('.row').appendChild(btn('Back','primary',()=>{closeModal();openMenu()}));
+}
+function openStats(){
+  const names={1:'1st class',2:'2nd class',3:'3rd class'};
+  let rows='';for(const k of[1,2,3]){const s=S.stats[k],t=s.ok+s.bad,p=t?Math.round(s.ok/t*100):0;rows+='<tr><td>'+names[k]+'</td><td>'+s.ok+' / '+t+'</td><td style="width:45%"><div class="bar"><i style="width:'+p+'%"></i></div></td><td>'+(t?p+'%':'–')+'</td></tr>'}
+  const q=S.quiz,qt=q.ok+q.bad;
+  const card=openModal('<h2>📁 Case file</h2><p>Rank: <b>'+rankOf()+'</b> · Reputation: <b>'+S.rep+'</b> · Highest trial cleared: <b>'+S.best+'</b></p><h3>See-saw accuracy by lever class</h3><table class="st"><tr><th>Class</th><th>Correct/attempts</th><th></th><th></th></tr>'+rows+'</table><p class="sub">Low accuracy shows which lever class to review.</p><p>Expert questions correct: <b>'+q.ok+' / '+qt+'</b></p><div class="row"></div>');
+  const r=card.querySelector('.row');
+  r.appendChild(btn('Back','primary',()=>{closeModal();openMenu()}));
+  r.appendChild(btn('Reset all progress','bad',()=>{if(confirm('Erase your lawyer, reputation and progress on this device?')){S=DEF();save();hud();closeModal();boot()}}));
+}
+/* customization + shop */
+let cTab='face';
+function openCustomize(first){
+  const card=openModal('<h2>'+(first?'Create your lawyer':'Customize & shop')+'</h2><div class="tabs"></div><div class="cust"><canvas id="pv" width="300" height="376"></canvas><div id="opts"></div></div><div class="row"></div>');
+  const tabs=card.querySelector('.tabs'),opts=card.querySelector('#opts'),pv=card.querySelector('#pv');
+  function pvDraw(){
+    const pc=pv.getContext('2d'),old=c;c=pc;pc.clearRect(0,0,300,376);
+    person(150,150,74,{look:S.look,mood:'',outfit:Object.assign({k:'suit'},suitOf(S.suit)),bottom:376});
+    c=old}
+  function chips(label,list,key,sw){
+    const g=document.createElement('div');g.className='grp';g.innerHTML='<label>'+label+'</label><div class="chips"></div>';
+    const ch=g.querySelector('.chips');
+    list.forEach((v,i)=>{const b=document.createElement('button');b.className='chip2'+(sw?' sw':'')+(S.look[key]===i?' on':'');
+      if(sw){b.style.background=v;b.setAttribute('aria-label',label+' '+(i+1))}else b.textContent=v;
+      b.onclick=()=>{S.look[key]=i;save();render()};ch.appendChild(b)});
+    return g}
+  function render(){
+    tabs.innerHTML='';
+    [['face','🙂 Face'],['suit','👔 Suits'],['gear','⚖ See-saw']].forEach(([k,l])=>{const b=btn(l,cTab===k?'on':'',()=>{cTab=k;render()});tabs.appendChild(b)});
+    opts.innerHTML='';
+    if(cTab==='face'){
+      opts.appendChild(chips('Skin tone',SKINS,'skin',true));
+      opts.appendChild(chips('Hair style',HAIRS,'hair'));
+      opts.appendChild(chips('Hair colour',HAIRC,'hairCol',true));
+      opts.appendChild(chips('Eyes',EYES,'eyes'));
+      opts.appendChild(chips('Eyebrows',BROWS,'brows'));
+      opts.appendChild(chips('Nose',NOSES,'nose'));
+      opts.appendChild(chips('Mouth',MOUTHS,'mouth'));
+    }else{
+      const isS=cTab==='suit',list=isS?SUITS:MATS,own=isS?S.ownS:S.ownM,cur=isS?S.suit:S.mat;
+      const p=document.createElement('p');p.className='sub';p.textContent='Reputation: '+S.rep+' ⭐ (earn it by winning trials)';opts.appendChild(p);
+      const sh=document.createElement('div');sh.className='shop';
+      list.forEach(it=>{const row=document.createElement('div');row.className='item';
+        const dot=document.createElement('div');dot.className='dot';dot.style.background=isS?it.jacket:it.beam;row.appendChild(dot);
+        row.insertAdjacentHTML('beforeend','<div class="nm">'+it.name+'<div class="pc">'+(own.includes(it.id)?'Owned':'⭐ '+it.cost)+'</div></div>');
+        const owned=own.includes(it.id);
+        const b=btn(cur===it.id?'Equipped':owned?'Equip':'Buy',cur===it.id?'good':'primary',()=>{
+          if(!owned){if(S.rep<it.cost){floaterModal(row,'Not enough reputation');return}S.rep-=it.cost;own.push(it.id)}
+          if(isS)S.suit=it.id;else S.mat=it.id;save();hud();render()});
+        b.disabled=cur===it.id;row.appendChild(b);sh.appendChild(row)});
+      opts.appendChild(sh);
+    }
+    pvDraw();
+  }
+  function floaterModal(el,t){const s=document.createElement('div');s.className='sub';s.style.color='#ff9b9b';s.textContent=t;el.appendChild(s);setTimeout(()=>s.remove(),1600)}
+  const row=card.querySelector('.row');
+  row.appendChild(btn(first?'✔ Done: to court!':'Back','primary',()=>{S.created=true;save();hud();closeModal();if(first)openMenu();else openMenu()}));
+  if(first)row.appendChild(btn('🎲 Randomize','',()=>{S.look=randLook();save();render()}));
+  render();
+}
+
+/* ================= boot ================= */
+function boot(){
+  load();hud();newCast();
+  G.phase='idle';G.detail=0;G.claim=null;
+  ui('Court','Welcome to the courtroom, counsel! Open the menu to begin.','',[{t:'☰ Menu',c:'primary',f:openMenu}]);
+  if(!S.created)openCustomize(true);else openMenu();
+}
+$('#bMenu').onclick=openMenu;
+$('#bSnd').onclick=()=>{S.muted=!S.muted;save();hud()};
+window.addEventListener('resize',resize);
+new ResizeObserver(resize).observe(cv);
+resize();boot();requestAnimationFrame(frame);
+window.__LL={S,G,tokens,evaluate,CLAIMS,startTrial,present,showClaim,get state(){return S}};
+})();
+</script>
+</body>
+</html>
