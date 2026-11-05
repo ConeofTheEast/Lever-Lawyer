@@ -19,8 +19,8 @@ The whole game is one file, `index.html`, with no build step or dependencies.
 ## Review section
 Menu → **Review the basics** is a 13-page review built from the B1.4 Levers pre-reading
 (what a lever is, parts, moment of force, effort/load arms, mechanical advantage with an
-interactive demo, the three classes with anatomical figures, the arm as a lever,
-external levers) and ends with a 7-question self-check. It is offered automatically
+interactive demo, the three classes with anatomical figures, muscle-insertion diagrams,
+the arm as a lever, external levers) and ends with a 7-question self-check. It is offered automatically
 the first time a student creates their lawyer.
 
 The textbook figures used in the review are in `img/`. If you do not have permission
@@ -37,3 +37,9 @@ another Chromebook, open Menu → **Save / transfer my character** and use any o
 
 Loading a save replaces the character on that device, so save the old one first if you
 want to keep it. Third-party code: `lib/qrcode.js` is qrcode-generator by Kazuhiko Arase (MIT licence).
+
+## Anatomy diagrams
+The review page **Where is the effort? Muscle insertions** has six simplified, original
+diagrams (biceps, triceps, calf, quadriceps, neck, deltoid) with the muscle insertion
+highlighted as the effort location. After a claim is resolved, a **See the anatomy**
+button opens the matching diagram for claims about those joints.
