@@ -64,6 +64,13 @@ button.btn:active:not(:disabled){transform:translateY(1px)}
 .bar>i{display:block;height:100%;background:linear-gradient(90deg,#2bb39a,#7ce0c6)}
 table.st{width:100%;border-collapse:collapse;font-size:14px}
 table.st td,table.st th{padding:6px 4px;text-align:left}
+.txt{width:100%;background:#101624;color:var(--ink);border:1px solid #ffffff33;border-radius:8px;padding:8px 10px;font:inherit;font-size:14px;resize:vertical}
+select.txt{width:auto}
+table.dec td,table.dec th{font-size:12px;padding:4px 6px;white-space:nowrap;text-align:center}
+table.dec td:first-child,table.dec th:first-child{text-align:left}
+.h-r{background:#8a2a33}.h-a{background:#8a6a1e}.h-g{background:#1f7a62}
+.cli{display:flex;align-items:center;gap:8px;background:#2a344c;border-radius:10px;padding:6px 10px;margin-bottom:6px;font-size:14px}
+.cli span{flex:1}
 dl{margin:0}dt{font-weight:700;color:var(--gold);margin-top:8px}dd{margin:2px 0 0;font-size:14.5px;line-height:1.4}
 </style>
 </head>
@@ -118,7 +125,7 @@ const MATS=[
 
 /* Each claim is a sham: with the TRUE lever arrangement the effort torque is smaller than the load torque.
    Teaching model: slots on the see-saw are 10 cm apart -> class 1 MA=1, class 2 MA=2, class 3 MA=0.5. */
-const CLAIMS=[
+const BASE_CLAIMS=[
  {id:'tiptoe',joint:'Ankle (standing on tiptoes)',cls:2,E:60,L:170,
   say:"Your Honor, the accused stood on their tippy toes to reach the escape hatch from the vault... while carrying ALL of the gold!",
   F:'Ball of the foot (metatarsophalangeal joint)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight (plus the gold) acting down through the ankle'},
@@ -154,8 +161,40 @@ const CLAIMS=[
   F:'Temporomandibular joint (jaw hinge)',Ef:'Masseter and temporalis pulling on the jaw near the hinge',Lo:'Weight of the gold bar gripped between the teeth'},
  {id:'rope',joint:'Elbow (hanging / climbing)',cls:3,E:30,L:20,
   say:"The accused pulled themselves up the rope, hand over hand, with a sack of gold on one arm!",
-  F:'Elbow joint',Ef:'Biceps and brachialis pulling on the forearm near the elbow',Lo:'Body weight and the gold pulling on the hand'}
+  F:'Elbow joint',Ef:'Biceps and brachialis pulling on the forearm near the elbow',Lo:'Body weight and the gold pulling on the hand'},
+ {id:'dorsi',joint:'Ankle (lifting the toes up)',cls:3,E:18,L:20,
+  say:"The accused hooked the toes under the museum case and hoisted it clear off the floor, using only the shin muscle!",
+  F:'Ankle joint',Ef:'Tibialis anterior pulling on the top of the foot',Lo:'Weight of the foot and the case, at the toes'},
+ {id:'museum',joint:'Ankle (tiptoe walking)',cls:2,E:55,L:160,
+  say:"The accused crept silently along the gallery on tiptoes, cradling a solid gold statue in both arms!",
+  F:'Ball of the foot (metatarsophalangeal joint)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the statue, pressing down through the ankle'},
+ {id:'wrist',joint:'Wrist (flexing / flicking)',cls:3,E:16,L:24,
+  say:"The accused flicked the wrist and sent a sack of gold coins flying onto the top shelf!",
+  F:'Wrist joint',Ef:'Wrist flexor muscles pulling on the hand near the joint',Lo:'Weight of the hand and the sack, far from the wrist'},
+ {id:'trunk',joint:'Spine (arching the back)',cls:1,E:30,L:55,
+  say:"The accused lay flat on the floor and arched the whole trunk off the ground with a gold chest strapped on top!",
+  F:'Vertebral joints of the lower back',Ef:'Erector spinae muscles pulling behind the spine',Lo:'Weight of the head, arms and trunk in front of the joint'},
+ {id:'sprint',joint:'Ankle (sprint start)',cls:2,E:65,L:180,
+  say:"The accused exploded off the starting blocks onto the toes, a pack of gold on their back, and cleared the fence in a single stride!",
+  F:'Ball of the foot (toes on the blocks)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the gold pack, through the ankle'},
+ {id:'hamstring',joint:'Knee (bending the leg)',cls:3,E:36,L:50,
+  say:"The accused hooked a heel under the gate latch and curled the leg up to flip it, with a gold anklet on each foot!",
+  F:'Knee joint',Ef:'Hamstrings pulling on the back of the lower leg just below the knee',Lo:'Weight of the lower leg, foot and the gold anklet'},
+ {id:'headbal',joint:'Neck (balancing a load on the head)',cls:1,E:28,L:45,
+  say:"The accused balanced a tower of gold plates on the head while gazing up at the clock, without a single wobble!",
+  F:'Atlanto-occipital joint (skull on the top vertebra)',Ef:'Neck extensor muscles pulling at the back of the skull',Lo:'Weight of the face and the plates in front of the joint'},
+ {id:'stairs',joint:'Ankle (climbing on the toes)',cls:2,E:62,L:175,
+  say:"The accused bounded up the clocktower stairs on the toes of both feet, a gold-filled backpack on their shoulders!",
+  F:'Ball of the foot (toes on the stair)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the backpack, through the ankle'},
+ {id:'throw',joint:'Elbow (overhead extension)',cls:1,E:28,L:48,
+  say:"The accused held a gold bar overhead and snapped the elbow straight with the triceps alone, hurling it over the fence!",
+  F:'Elbow joint',Ef:'Triceps pulling on the olecranon behind the joint',Lo:'Weight of the forearm and the bar, beyond the joint'},
+ {id:'skip',joint:'Ankle (skipping rope)',cls:2,E:58,L:165,
+  say:"The accused skipped rope on the toes for ten minutes, with a belt of gold bars around the waist!",
+  F:'Ball of the foot (toes on the ground)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the gold belt, through the ankle'}
 ];
+let CLAIMS=BASE_CLAIMS.slice();
+function rebuildClaims(){CLAIMS=BASE_CLAIMS.concat((S&&S.custom)||[])}
 const MIDDLE={1:'Fulcrum',2:'Load',3:'Effort'};
 const CASES=['The Case of the Golden Sack','The Curious Vault Affair','The Hatch Incident','The Gilded Ladder','The Midnight Climb','The Rooftop Affair','The Lantern Lane Matter','The Marble Hall Mystery','The Brass Key Business','The Clocktower Question'];
 const SP=10; // cm between slots
@@ -164,12 +203,12 @@ const RANKS=[[0,'Law Student'],[100,'Junior Associate'],[300,'Attorney'],[700,'S
 /* ================= save (localStorage + cookie backup) ================= */
 const KEY='leverLawyerSave_v1';
 const DEF=()=>({created:false,look:{skin:2,hair:1,hairCol:1,eyes:0,brows:1,nose:0,mouth:0},suit:'drab',mat:'wood',
-  ownS:['drab'],ownM:['wood'],rep:0,fame:0,level:1,best:0,stats:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},quiz:{ok:0,bad:0},muted:false});
+  ownS:['drab'],ownM:['wood'],rep:0,fame:0,level:1,best:0,stats:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},quiz:{ok:0,bad:0},recall:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},name:'',custom:[],muted:false});
 let S=DEF();
 function load(){let s=null;
   try{s=localStorage.getItem(KEY)}catch(e){}
   if(!s){try{const m=document.cookie.match(new RegExp('(?:^|; )'+KEY+'=([^;]*)'));if(m)s=decodeURIComponent(m[1])}catch(e){}}
-  if(s){try{const o=JSON.parse(s);const d=DEF();S=Object.assign(d,o);S.look=Object.assign(d.look,o.look||{});S.stats=Object.assign(d.stats,o.stats||{})}catch(e){S=DEF()}}}
+  if(s){try{const o=JSON.parse(s);const d=DEF();S=Object.assign(d,o);S.look=Object.assign(d.look,o.look||{});S.stats=Object.assign(d.stats,o.stats||{});S.recall=Object.assign(d.recall,o.recall||{});if(!Array.isArray(S.custom))S.custom=[]}catch(e){S=DEF()}}rebuildClaims()}
 function save(){const s=JSON.stringify(S);
   try{localStorage.setItem(KEY,s)}catch(e){}
   try{document.cookie=KEY+'='+encodeURIComponent(s)+';max-age=31536000;path=/;SameSite=Lax'}catch(e){}}
@@ -487,22 +526,34 @@ function pickClaims(level){
     const cl2=pool[0]||pick(CLAIMS.filter(x=>!used.has(x.id)));used.add(cl2.id);out.push(cl2)}
   return out;
 }
-function startTrial(){
+function startCustom(){const pool=shuffle(S.custom);startTrial({claims:pool.slice(0,4)})}
+function startTrial(o){
+  o=(o&&o.claims&&o.claims.length)?o:null;G.opts=o;
   closeModal();newCast();
-  const lv=S.level,detail=lv<=2?0:lv<=4?1:2;
-  G.detail=detail;G.trial={level:lv,claims:pickClaims(lv),idx:0,title:pick(CASES),detail};
+  const lv=S.level,detail=o?2:(lv<=2?0:lv<=4?1:2);
+  G.detail=detail;G.trial={level:lv,claims:o?o.claims:pickClaims(lv),idx:0,title:o?'The Custom Case':pick(CASES),detail,custom:!!o};
   G.jailed=false;G.clientMood='';G.youMood='';G.profMood='';G.judgeMood='';G.expertTarget=0;G.ang=0;G.anim=null;G.res=null;G.claim=null;
   resetTokens();G.phase='intro';
   const n=G.trial.claims.length;
   ui('Judge','All rise! Court is in session for <b>'+G.trial.title+'</b>. The prosecution will make '+(n===1?'<b>one claim</b>':'<b>'+n+' claims</b>')+' about what the human body can do. Defense, you must show the jury each one is physically impossible.',
-    'Trial '+lv+(detail===0?' · Concept round: no numbers yet.':detail===1?' · Numbers round: compare torques.':' · Expert round: numbers plus witness questions.'),
+    (o?'Custom claims practice (does not change your trial level)':'Trial '+lv)+(detail===0?' · Concept round: no numbers yet.':detail===1?' · Numbers round: compare torques.':' · Expert round: numbers plus witness questions.'),
     [{t:'Begin',c:'primary',f:()=>{sfx.gavel();G.gavelT=performance.now()/1000;showClaim()}},{t:'Skip to menu',f:openMenu}]);
 }
 function resetTokens(){for(const k in tokens)tokens[k].slot=-1;sel=null;drag=null;G.ang=0}
 function showClaim(){
   const tr=G.trial;G.claim=tr.claims[tr.idx];G.phase='arrange';G.hint=0;G.tries=0;G.firstTry=true;G.expertTarget=0;G.ang=0;G.anim=null;
-  G.profMood='smug';G.youMood='';G.juryMood='idle';resetTokens();refreshArrange('<i>Claim '+(tr.idx+1)+' of '+tr.claims.length+'</i><br>');
+  G.profMood='smug';G.youMood='';G.juryMood='idle';resetTokens();
+  const pre='<i>Claim '+(tr.idx+1)+' of '+tr.claims.length+'</i><br>';
+  G.phase='quiz';
+  ui('Prosecutor',pre+'“'+G.claim.say+'”','Before the demonstration, the judge will ask you two <b>recall</b> questions. Answer from memory.',
+    [{t:'Answer the judge ▶',c:'primary',f:()=>runQuiz([classQ(G.claim),fulcQ(G.claim)],()=>{G.phase='arrange';G.expertTarget=0;refreshArrange(pre)})}]);
 }
+function anatText(cl){return 'The '+cl.joint.toLowerCase()+' is a <b>'+ord[cl.cls]+'-class lever</b>: Fulcrum = '+cl.F+'; Effort = '+cl.Ef+'; Load = '+cl.Lo+'. The <b>'+MIDDLE[cl.cls]+'</b> sits in the middle.'}
+function classQ(cl){return{q:'For the record, counsel: what <b>class of lever</b> is the <b>'+cl.joint+'</b> as the prosecution describes it?',
+  opts:['1st class lever','2nd class lever','3rd class lever'],ans:ord[cl.cls]+' class lever',why:anatText(cl),recall:1,cls:cl.cls,who:'Judge',gain:5,
+  info:'Recall check: answer from memory before you build the see-saw (+5 rep for a correct answer).'}}
+function fulcQ(cl){return Object.assign(anatomyQ(cl,'F'),{why:anatText(cl),recall:1,cls:cl.cls,who:'Judge',gain:5,
+  info:'Recall check: answer from memory (+5 rep for a correct answer).'})}
 function infoLine(){
   const cl=G.claim,d=G.detail;
   let s='Build the <b>'+cl.joint+'</b> lever: place <b>F</b>ulcrum, <b>E</b>ffort and <b>L</b>oad on the see-saw.';
@@ -552,7 +603,7 @@ function outcome(r){
     banner('GUILTY!','#ff6b6b','Your client goes to jail',2.4);
     ui('Judge','The jury watched the load rise! Your model made the effort look strong enough, so the verdict is <b>GUILTY</b>. Your client is taken away. Trial lost.',
       '<b>What went wrong:</b> you built a <b>'+mine+'</b> lever, which exaggerated the effort. '+(G.detail>=1?torqueTxt(r)+' ':'')+realTxt,
-      [{t:'↺ Retry this trial',c:'primary',f:()=>{startTrial()}},{t:'Menu',f:openMenu}]);
+      [{t:'↺ Retry this trial',c:'primary',f:()=>{startTrial(G.opts)}},{t:'Menu',f:openMenu}]);
     save();
   }
 }
@@ -562,8 +613,8 @@ function afterClaim(){
   if(G.detail>=2)quizzes.push(maQ(cl));
   runQuiz(quizzes,()=>{const tr=G.trial;tr.idx++;if(tr.idx>=tr.claims.length)trialWon();else{G.expertTarget=0;showClaim()}});
 }
-function anatomyQ(cl){
-  const roles=[['F','Fulcrum (axis)','F'],['E','Effort','Ef'],['L','Load (resistance)','Lo']],ro=pick(roles);
+function anatomyQ(cl,key){
+  const roles=[['F','Fulcrum (axis)','F'],['E','Effort','Ef'],['L','Load (resistance)','Lo']],ro=key?roles.find(r=>r[0]===key):pick(roles.slice(1));
   const others=shuffle(CLAIMS.filter(x=>x[ro[2]]!==cl[ro[2]]&&x.id!==cl.id));const seen=new Set([cl[ro[2]]]),opts=[cl[ro[2]]];
   for(const o of others){if(!seen.has(o[ro[2]])&&opts.length<3){seen.add(o[ro[2]]);opts.push(o[ro[2]])}}
   return{q:'In the <b>'+cl.joint+'</b> lever, which is the <b>'+ro[1]+'</b>?',opts:shuffle(opts),ans:cl[ro[2]],why:''};
@@ -576,15 +627,16 @@ function maQ(cl){
 }
 function runQuiz(list,done){
   if(!list.length)return done();
-  const q=list.shift();G.expertTarget=1;G.phase='quiz';
+  const q=list.shift(),who=q.who||'Expert';if(who==='Expert')G.expertTarget=1;G.phase='quiz';
   const acts=q.opts.map(o=>({t:o,f:()=>{
-    const ok=o===q.ans;S.quiz[ok?'ok':'bad']++;
-    if(ok){addRep(10);floater('+10 rep','#ffe27a',110,330);sfx.cheer()}else{sfx.bad()}
-    ui('Expert',ok?'✔ Correct! '+q.why:'✘ Not quite. The answer is: <b>'+q.ans+'</b>. '+q.why,'',[{t:'Continue',c:'primary',f:()=>{G.expertTarget=0;runQuiz(list,done)}}]);save()}}));
-  ui('Expert',q.q,'The expert witness quizzes you before the court moves on (+10 rep for a correct answer).',acts);
+    const ok=o===q.ans;if(q.recall)S.recall[q.cls][ok?'ok':'bad']++;else S.quiz[ok?'ok':'bad']++;
+    const gain=q.gain||10;
+    if(ok){addRep(gain);floater('+'+gain+' rep','#ffe27a',110,330);sfx.cheer()}else{sfx.bad()}
+    ui(who,ok?'✔ Correct! '+q.why:'✘ Not quite. The answer is: <b>'+q.ans+'</b>. '+q.why,'',[{t:'Continue',c:'primary',f:()=>{G.expertTarget=0;runQuiz(list,done)}}]);save()}}));
+  ui(who,q.q,q.info||'The expert witness quizzes you before the court moves on (+10 rep for a correct answer).',acts);
 }
 function trialWon(){
-  const tr=G.trial,bonus=40+10*tr.level;addRep(bonus);S.best=Math.max(S.best,tr.level);S.level=tr.level+1;save();hud();
+  const tr=G.trial,bonus=tr.custom?30:40+10*tr.level;addRep(bonus);if(!tr.custom){S.best=Math.max(S.best,tr.level);S.level=tr.level+1}save();hud();
   G.phase='won';G.juryMood='cheer';G.juryUntil=performance.now()/1000+4;G.youMood='cheer';G.clientMood='cheer';G.profMood='angry';G.judgeMood='';G.gavelT=performance.now()/1000;sfx.gavel();setTimeout(sfx.cheer,300);
   banner('NOT GUILTY!','#7cf0b8','Case dismissed',2.4);floater('+'+bonus+' rep','#ffe27a',110,330);
   ui('Judge','The jury has seen the physics. <b>Not guilty</b>; the case is dismissed! You earned <b>'+bonus+' reputation</b>.',
@@ -633,9 +685,12 @@ function openMenu(){
   const card=openModal('<h2>⚖ Lever Lawyer</h2><p class="sub">Defend your client by proving the prosecution\'s claims are physically impossible, using the levers of the human body.</p><div class="menuBtns"></div>');
   const m=card.querySelector('.menuBtns');
   if(inTrial)m.appendChild(btn('▶ Resume trial','primary',closeModal));
-  m.appendChild(btn(inTrial?'↺ Restart this trial':'▶ Start Trial '+S.level,inTrial?'':'primary',startTrial));
+  m.appendChild(btn(inTrial?'↺ Restart this trial':'▶ Start Trial '+S.level,inTrial?'':'primary',()=>startTrial(inTrial?G.opts:null)));
   m.appendChild(btn('🎨 Customize lawyer & shop','',()=>openCustomize(false)));
   m.appendChild(btn('📁 Case file (progress)','',openStats));
+  if(S.custom.length)m.appendChild(btn('📝 Practice my teacher\'s custom claims ('+S.custom.length+')','',startCustom));
+  m.appendChild(btn('📤 Submit results to teacher','',openSubmit));
+  m.appendChild(btn('🧑‍🏫 Teacher tools','',openTeacher));
   m.appendChild(btn('📖 How to play & glossary','',openHelp));
   card.insertAdjacentHTML('beforeend','<p class="sub" style="margin-top:12px">Progress is saved automatically in this browser (localStorage + cookie).</p>');
 }
@@ -644,7 +699,8 @@ function openHelp(){
   <p>The prosecutor makes a claim about what a body part can do. Build that joint as a <b>see-saw lever</b>: drag <b>F</b> (fulcrum), <b>E</b> (effort) and <b>L</b> (load) onto the three slots (or tap a token, then tap a slot), then <b>Present to the jury</b>.</p>
   <ul><li><b>Correct lever → the effort fails → claim impossible → jury cheers.</b></li>
   <li>Wrong lever but the beam still fails → the <b>expert witness objects</b>; retry for a small reputation penalty.</li>
-  <li>Wrong lever and the beam lifts the load → the jury is convinced → <b>GUILTY</b>, trial lost.</li></ul>
+  <li>Wrong lever and the beam lifts the load → the jury is convinced → <b>GUILTY</b>, trial lost.</li>
+  <li>Before each demonstration the judge asks you to name the lever class and the fulcrum <b>from memory</b> (+5 rep each).</li></ul>
   <p><b>Memory aid:</b> 1-2-3 = <b>F-L-E</b> in the middle. 1st class: fulcrum in the middle. 2nd class: load in the middle. 3rd class: effort in the middle.</p>
   <h3>Glossary</h3><dl>
   <dt>Fulcrum (axis)</dt><dd>The pivot point; in the body, the joint.</dd>
@@ -661,9 +717,10 @@ function openHelp(){
 }
 function openStats(){
   const names={1:'1st class',2:'2nd class',3:'3rd class'};
-  let rows='';for(const k of[1,2,3]){const s=S.stats[k],t=s.ok+s.bad,p=t?Math.round(s.ok/t*100):0;rows+='<tr><td>'+names[k]+'</td><td>'+s.ok+' / '+t+'</td><td style="width:45%"><div class="bar"><i style="width:'+p+'%"></i></div></td><td>'+(t?p+'%':'–')+'</td></tr>'}
+  const mk=src=>{let r='';for(const k of[1,2,3]){const s=src[k],t=s.ok+s.bad,p=t?Math.round(s.ok/t*100):0;r+='<tr><td>'+names[k]+'</td><td>'+s.ok+' / '+t+'</td><td style="width:45%"><div class="bar"><i style="width:'+p+'%"></i></div></td><td>'+(t?p+'%':'–')+'</td></tr>'}return r};
+  const rows=mk(S.stats),rows2=mk(S.recall);
   const q=S.quiz,qt=q.ok+q.bad;
-  const card=openModal('<h2>📁 Case file</h2><p>Rank: <b>'+rankOf()+'</b> · Reputation: <b>'+S.rep+'</b> · Highest trial cleared: <b>'+S.best+'</b></p><h3>See-saw accuracy by lever class</h3><table class="st"><tr><th>Class</th><th>Correct/attempts</th><th></th><th></th></tr>'+rows+'</table><p class="sub">Low accuracy shows which lever class to review.</p><p>Expert questions correct: <b>'+q.ok+' / '+qt+'</b></p><div class="row"></div>');
+  const card=openModal('<h2>📁 Case file</h2><p>Rank: <b>'+rankOf()+'</b> · Reputation: <b>'+S.rep+'</b> · Highest trial cleared: <b>'+S.best+'</b></p><h3>See-saw accuracy by lever class</h3><table class="st"><tr><th>Class</th><th>Correct/attempts</th><th></th><th></th></tr>'+rows+'</table><h3>Recall: lever class and fulcrum from memory</h3><table class="st"><tr><th>Class</th><th>Correct/attempts</th><th></th><th></th></tr>'+rows2+'</table><p class="sub">Low accuracy shows which lever class to review.</p><p>Expert questions correct: <b>'+q.ok+' / '+qt+'</b></p><div class="row"></div>');
   const r=card.querySelector('.row');
   r.appendChild(btn('Back','primary',()=>{closeModal();openMenu()}));
   r.appendChild(btn('Reset all progress','bad',()=>{if(confirm('Erase your lawyer, reputation and progress on this device?')){S=DEF();save();hud();closeModal();boot()}}));
@@ -671,8 +728,9 @@ function openStats(){
 /* customization + shop */
 let cTab='face';
 function openCustomize(first){
-  const card=openModal('<h2>'+(first?'Create your lawyer':'Customize & shop')+'</h2><div class="tabs"></div><div class="cust"><canvas id="pv" width="300" height="376"></canvas><div id="opts"></div></div><div class="row"></div>');
+  const card=openModal('<h2>'+(first?'Create your lawyer':'Customize & shop')+'</h2><div class="grp"><label>Lawyer name (shown to your teacher)</label><input id="nm" class="txt" maxlength="30" placeholder="First name and initial"></div><div class="tabs"></div><div class="cust"><canvas id="pv" width="300" height="376"></canvas><div id="opts"></div></div><div class="row"></div>');
   const tabs=card.querySelector('.tabs'),opts=card.querySelector('#opts'),pv=card.querySelector('#pv');
+  const nmI=card.querySelector('#nm');nmI.value=S.name||'';nmI.oninput=()=>{S.name=nmI.value.trim();save()};
   function pvDraw(){
     const pc=pv.getContext('2d'),old=c;c=pc;pc.clearRect(0,0,300,376);
     person(150,150,74,{look:S.look,mood:'',outfit:Object.assign({k:'suit'},suitOf(S.suit)),bottom:376});
@@ -719,6 +777,98 @@ function openCustomize(first){
   render();
 }
 
+/* ================= teacher tools ================= */
+const b64e=s=>btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const b64d=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)))};
+const chk=s=>{let h=7;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%1679616;return h.toString(36).padStart(4,'0')};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const unesc=s=>String(s).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+function copyText(ta,msg){const done=()=>{if(msg)msg.textContent='Copied ✔'};ta.select();
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(ta.value).then(done,()=>{try{document.execCommand('copy')}catch(e){}done()});
+  else{try{document.execCommand('copy')}catch(e){}done()}}
+function makeCode(){
+  const a=k=>[S.stats[k].ok,S.stats[k].bad],r=k=>[S.recall[k].ok,S.recall[k].bad];
+  const o={n:S.name||'(no name)',rep:S.rep,b:S.best,rk:rankOf(),t:[a(1),a(2),a(3)],rc:[r(1),r(2),r(3)],q:[S.quiz.ok,S.quiz.bad],d:new Date().toISOString().slice(0,10)};
+  const j=JSON.stringify(o);return 'LL1.'+b64e(j)+'.'+chk(j)}
+function openSubmit(){
+  const card=openModal('<h2>📤 Submit results</h2><p>Enter your name, copy your code, then paste it where your teacher tells you (for example a class form).</p><div class="grp"><label>Your name</label><input id="nm2" class="txt" maxlength="30"></div><div class="grp"><label>Your code</label><textarea id="code" class="txt" rows="4" readonly></textarea></div><p class="sub" id="cmsg">The code holds your name, trial reached and accuracy by lever class. It does not contain anything else.</p><div class="row"></div>');
+  const nm=card.querySelector('#nm2'),ta=card.querySelector('#code'),msg=card.querySelector('#cmsg');
+  nm.value=S.name||'';const upd=()=>{S.name=nm.value.trim();save();ta.value=makeCode()};nm.oninput=upd;upd();
+  const row=card.querySelector('.row');
+  row.appendChild(btn('📋 Copy code','primary',()=>copyText(ta,msg)));
+  row.appendChild(btn('Back','',()=>{closeModal();openMenu()}));
+}
+function openTeacher(){
+  const card=openModal('<h2>🧑‍🏫 Teacher tools</h2><p class="sub">Collect student codes (e.g. with a Google Form) and decode them into a class table, or write your own claims for students to practise.</p><div class="menuBtns"></div>');
+  const m=card.querySelector('.menuBtns');
+  m.appendChild(btn('📊 Decode student codes','primary',openDecode));
+  m.appendChild(btn('📝 Custom claims editor ('+S.custom.length+')','',openCustom));
+  m.appendChild(btn('Back','',()=>{closeModal();openMenu()}));
+}
+function openDecode(){
+  const card=openModal('<h2>📊 Decode student codes</h2><p class="sub">Paste codes: one per line, or a whole column copied from your form or spreadsheet.</p><textarea id="din" class="txt" rows="5" placeholder="LL1.…"></textarea><div class="row"></div><div id="dout" style="overflow:auto;margin-top:10px"></div>');
+  const ta=card.querySelector('#din'),out=card.querySelector('#dout'),row=card.querySelector('.row');let csv='';
+  const pct=x=>(x[0]+x[1])?Math.round(x[0]/(x[0]+x[1])*100):null;
+  const cell=x=>{const p=pct(x);return p===null?'<td>–</td>':'<td class="'+(p<60?'h-r':p<80?'h-a':'h-g')+'">'+p+'% <small>('+x[0]+'/'+(x[0]+x[1])+')</small></td>'};
+  function run(){
+    const ms=[...ta.value.matchAll(/LL1\.([A-Za-z0-9_-]+)\.([0-9a-z]{4})/g)];
+    if(!ms.length){out.innerHTML='<p class="sub">No codes found.</p>';csv='';return}
+    let h='<table class="st dec"><tr><th>Name</th><th>Rank</th><th>Rep</th><th>Best trial</th><th>Recall 1st</th><th>Recall 2nd</th><th>Recall 3rd</th><th>See-saw 1st</th><th>See-saw 2nd</th><th>See-saw 3rd</th><th>Expert Qs</th><th>Date</th></tr>';
+    const lines=[['Name','Rank','Rep','Best trial','Recall 1st %','Recall 2nd %','Recall 3rd %','Seesaw 1st %','Seesaw 2nd %','Seesaw 3rd %','Expert Qs %','Date']];
+    for(const m of ms){let o=null;try{const j=b64d(m[1]);if(chk(j)===m[2])o=JSON.parse(j)}catch(e){}
+      if(!o){h+='<tr><td colspan="12">⚠ Invalid or altered code: '+esc(m[0].slice(0,24))+'…</td></tr>';continue}
+      h+='<tr><td>'+esc(o.n)+'</td><td>'+esc(o.rk)+'</td><td>'+o.rep+'</td><td>'+o.b+'</td>'+o.rc.map(cell).join('')+o.t.map(cell).join('')+cell(o.q)+'<td>'+esc(o.d)+'</td></tr>';
+      lines.push([o.n,o.rk,o.rep,o.b].concat(o.rc.map(pct),o.t.map(pct),[pct(o.q),o.d]).map(v=>'"'+String(v===null?'':v).replace(/"/g,'""')+'"'));
+    }
+    out.innerHTML=h+'</table><p class="sub">Red below 60%, amber 60–79%, green 80% and above. Codes are checksummed but this is a review tool, not a secure exam.</p>';
+    csv=lines.map(l=>l.join(',')).join('\n')}
+  row.appendChild(btn('Decode','primary',run));
+  row.appendChild(btn('📋 Copy as CSV','',()=>{if(!csv)run();const t=document.createElement('textarea');t.value=csv;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);copyText(t);t.remove()}));
+  row.appendChild(btn('Back','',openTeacher));
+}
+function shamOK(cls,E,L){return E>0&&L>0&&E*({1:1,2:2,3:.5}[cls])<L}
+function cleanClaim(x){
+  const t=(v,n)=>esc(unesc(String(v==null?'':v)).trim().slice(0,n));
+  const cls=+x.cls,E=+x.E,L=+x.L;
+  if(![1,2,3].includes(cls)||!(E>0)||!(L>0)||!shamOK(cls,E,L))return null;
+  const o={id:t(x.id||('c_'+Date.now()+Math.random().toString(36).slice(2,6)),40),joint:t(x.joint,80),cls,E,L,say:t(x.say,300),F:t(x.F,200),Ef:t(x.Ef,200),Lo:t(x.Lo,200),custom:true};
+  return(o.joint&&o.say&&o.F&&o.Ef&&o.Lo)?o:null}
+function openCustom(){
+  const card=openModal(`<h2>📝 Custom claims</h2><p class="sub">Write your own sham claims. They appear in trials from level 4 on, and in <b>Practice custom claims</b> on the menu. They are saved on this device; use the share code to give them to students (they paste it into the Import box).</p>
+  <div id="cl"></div><h3>Add a claim</h3>
+  <div class="grp"><label>Joint / action</label><input class="txt" id="f_joint" maxlength="80" placeholder="Wrist (flicking a coin)"></div>
+  <div class="grp"><label>True lever class</label><select class="txt" id="f_cls"><option value="1">1st class</option><option value="2">2nd class</option><option value="3">3rd class</option></select></div>
+  <div class="grp"><label>Effort available (kgf) · Load (kgf)</label><div class="chips"><input class="txt" style="width:110px" id="f_E" type="number" min="1" placeholder="Effort"><input class="txt" style="width:110px" id="f_L" type="number" min="1" placeholder="Load"></div><div class="sub" id="f_hint"></div></div>
+  <div class="grp"><label>Prosecutor's claim</label><textarea class="txt" id="f_say" rows="2" maxlength="300" placeholder="The accused …"></textarea></div>
+  <div class="grp"><label>Fulcrum</label><input class="txt" id="f_F" maxlength="200"></div>
+  <div class="grp"><label>Effort</label><input class="txt" id="f_Ef" maxlength="200"></div>
+  <div class="grp"><label>Load</label><input class="txt" id="f_Lo" maxlength="200"></div>
+  <p class="sub" id="f_msg" style="color:#ffb3b3"></p><div class="row" id="r1"></div>
+  <h3>Share</h3><div class="grp"><label>Share code (copy to students) / paste code to import</label><textarea class="txt" id="f_share" rows="3"></textarea></div><p class="sub" id="f_smsg"></p><div class="row" id="r2"></div>`);
+  const $f=id=>card.querySelector('#'+id),list=$f('cl'),share=$f('f_share'),msg=$f('f_msg');
+  function hint(){const cls=+$f('f_cls').value,L=+$f('f_L').value;$f('f_hint').textContent=L>0?'For the claim to be impossible, effort must be below '+(L/({1:1,2:2,3:.5}[cls]))+' kgf (slots are 10 cm apart in this model).':'Pick numbers so the correct lever cannot lift the load: 1st class needs E < L, 2nd class E < L ÷ 2, 3rd class E < 2 × L.'}
+  function render(){
+    list.innerHTML=S.custom.length?'':'<p class="sub">No custom claims yet.</p>';
+    S.custom.forEach((x,i)=>{const d=document.createElement('div');d.className='cli';d.innerHTML='<span><b>'+x.joint+'</b> · '+ord[x.cls]+' class · E '+x.E+' / L '+x.L+'</span>';
+      d.appendChild(btn('✕','bad',()=>{S.custom.splice(i,1);rebuildClaims();save();render()}));list.appendChild(d)});
+    share.value=S.custom.length?'LLC1.'+b64e(JSON.stringify(S.custom)):'';hint()}
+  ['f_cls','f_L'].forEach(id=>{$f(id).oninput=hint;$f(id).onchange=hint});
+  $f('r1').appendChild(btn('➕ Add claim','primary',()=>{
+    const x={joint:$f('f_joint').value,cls:$f('f_cls').value,E:$f('f_E').value,L:$f('f_L').value,say:$f('f_say').value,F:$f('f_F').value,Ef:$f('f_Ef').value,Lo:$f('f_Lo').value};
+    const o=cleanClaim(x);
+    if(!o){msg.textContent=(+x.E>0&&+x.L>0&&!shamOK(+x.cls,+x.E,+x.L))?'Not a sham yet: with the correct lever the effort would win. Lower the effort or raise the load (see the hint above).':'Please fill in every field with valid numbers.';return}
+    msg.textContent='';S.custom.push(o);rebuildClaims();save();['f_joint','f_E','f_L','f_say','f_F','f_Ef','f_Lo'].forEach(id=>$f(id).value='');render()}));
+  $f('r2').appendChild(btn('📋 Copy share code','',()=>copyText(share,$f('f_smsg'))));
+  $f('r2').appendChild(btn('⬇ Import pasted code','',()=>{
+    const m=share.value.match(/LLC1\.([A-Za-z0-9_-]+)/);let n=0,bad=0;
+    try{if(!m)throw 0;const arr=JSON.parse(b64d(m[1]));if(!Array.isArray(arr))throw 0;
+      for(const x of arr){const o=cleanClaim(x);if(!o){bad++;continue}const i=S.custom.findIndex(c=>c.id===o.id);if(i>=0)S.custom[i]=o;else S.custom.push(o);n++}
+      rebuildClaims();save();render();$f('f_smsg').textContent='Imported '+n+' claim'+(n===1?'':'s')+(bad?' ('+bad+' skipped as invalid)':'')+' ✔'}
+    catch(e){$f('f_smsg').textContent='That does not look like a valid share code.'}}));
+  const back=document.createElement('div');back.className='row';back.appendChild(btn('Back','primary',openTeacher));card.appendChild(back);
+  render();
+}
+
 /* ================= boot ================= */
 function boot(){
   load();hud();newCast();
@@ -731,7 +881,7 @@ $('#bSnd').onclick=()=>{S.muted=!S.muted;save();hud()};
 window.addEventListener('resize',resize);
 new ResizeObserver(resize).observe(cv);
 resize();boot();requestAnimationFrame(frame);
-window.__LL={S,G,tokens,evaluate,CLAIMS,startTrial,present,showClaim,get state(){return S}};
+window.__LL={G,tokens,evaluate,get CLAIMS(){return CLAIMS},startTrial,present,showClaim,get S(){return S},makeCode,b64d,chk};
 })();
 </script>
 </body>
