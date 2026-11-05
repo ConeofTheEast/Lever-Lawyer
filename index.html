@@ -422,6 +422,12 @@ function line(x1,y1,x2,y2,col,w){c.strokeStyle=col;c.lineWidth=w||3;c.lineCap='r
 const stand=()=>[[-3,-26,-5,0],[3,-26,5,0]];
 const base=o=>Object.assign({h:[0,-100],n:[0,-88],p:[0,-52],l:stand(),a:[[-3,-66,-4,-46],[3,-66,4,-46]]},o||{});
 const wave=(T,k)=>(1+Math.sin(T*(k||3)))/2;
+function lab(m){if(!G.labels)return;const col={F:'#4a6fa8',E:'#cf4a4a',L:'#d9a622'};
+  for(const k of['F','E','L']){const a=m[k];if(!a)continue;
+    c.strokeStyle='#111';c.lineWidth=1.5;c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(a[2],a[3]);c.stroke();
+    c.fillStyle=col[k];c.beginPath();c.arc(a[0],a[1],3.5,0,7);c.fill();
+    c.beginPath();c.arc(a[2],a[3],9,0,7);c.fill();c.strokeStyle='#fff';c.lineWidth=2;c.stroke();
+    c.fillStyle='#fff';c.font='bold 12px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText(k,a[2],a[3]+.5);c.textBaseline='alphabetic'}}
 function tip(T,v){
   const lf=7+3*Math.sin(T*3),legs=[[-3,-28-lf/2,-6,-lf,4,0],[3,-28-lf/2,6,-lf,16,0]];
   const o={h:[0,-100-lf],n:[0,-88-lf],p:[0,-52-lf*.9],l:legs};
@@ -429,41 +435,55 @@ function tip(T,v){
   else if(v==='statue'){o.a=[[6,-72-lf,18,-66-lf]];gbar(23,-72-lf,9,28)}
   else if(v==='stairs'){blk(24,-8,18,8,'#9aa0ad');blk(42,-16,18,16,'#9aa0ad');blk(60,-24,18,24,'#9aa0ad');gsack(-14,-72-lf,11);o.a=[[-8,-72-lf,-16,-58-lf],[8,-72-lf,16,-62-lf]]}
   else{const up=(T*2)%2<1;c.strokeStyle='#8a5a2b';c.lineWidth=3;c.beginPath();c.ellipse(4,-62-lf,38,62,0,up?Math.PI*1.12:Math.PI*.12,up?Math.PI*1.88:Math.PI*.88);c.stroke();gbar(0,-52-lf*.9,26,7);o.a=[[8,-72-lf,20,-58-lf],[-6,-72-lf,-18,-58-lf]]}
-  fig(o)}
+  fig(o);lab({F:[10,0,28,14],E:[-8,-16-lf/2,-28,-6],L:[0,-58-lf,30,-44]})}
 function sprint(T){blk(-40,-8,12,8,'#555');blk(54,-46,5,46,'#8b8f99');gsack(-9,-74,11);const e=wave(T,5);
-  fig({h:[22,-88],n:[14,-76],p:[-6,-52],l:[[8,-46,16+6*e,-22,24+6*e,-20],[-12,-28,-26-4*e,-6,-22-4*e,0]],a:[[24,-62,32,-74+8*e],[4,-62,-8,-50-8*e]]})}
+  fig({h:[22,-88],n:[14,-76],p:[-6,-52],l:[[8,-46,16+6*e,-22,24+6*e,-20],[-12,-28,-26-4*e,-6,-22-4*e,0]],a:[[24,-62,32,-74+8*e],[4,-62,-8,-50-8*e]]});
+  lab({F:[-22-4*e,0,-8,14],E:[-21-2*e,-14,-42,-22],L:[-6,-58,-34,-54]})}
 function jump(T){blk(34,-34,14,34,'#8b8f99');gsack(-14,-84,10);const b=Math.sin(T*3)*3;c.save();c.translate(0,b);
-  fig({h:[0,-110],n:[0,-98],p:[0,-62],l:[[-3,-36,-6,-12,0,-2],[14,-62,8,-38,14,-36]],a:[[8,-104,16,-120],[-6,-104,-14,-120]]});c.restore()}
+  fig({h:[0,-110],n:[0,-98],p:[0,-62],l:[[-3,-36,-6,-12,0,-2],[14,-62,8,-38,14,-36]],a:[[8,-104,16,-120],[-6,-104,-14,-120]]});
+  lab({F:[0,-2,-20,8],E:[-5,-22,-28,-18],L:[0,-62,26,-62]});c.restore()}
 function plank(T){const b=Math.sin(T*3)*3;gsack(-2,-34+b,10);
-  fig({h:[38,-32+b],n:[30,-28+b],p:[-12,-20+b],fx:3,l:[[-30,-14+b/2,-48,-3,-52,0]],a:[[28,-14,26,0],[24,-14,22,0]]})}
+  fig({h:[38,-32+b],n:[30,-28+b],p:[-12,-20+b],fx:3,l:[[-30,-14+b/2,-48,-3,-52,0]],a:[[28,-14,26,0],[24,-14,22,0]]});
+  lab({F:[-52,0,-52,16],E:[26,-8,42,-26],L:[-2,-24+b,-2,-58]})}
 function curl(T){const f=-.9+2.2*wave(T,2.2),hx=4+24*Math.cos(f),hy=-66-24*Math.sin(f);gbar(hx+3,hy,24,7);
-  fig(base({a:[[4,-66,hx,hy],[-3,-66,-4,-46]]}))}
+  fig(base({a:[[4,-66,hx,hy],[-3,-66,-4,-46]]}));
+  lab({F:[4,-66,-22,-60],E:[4+8*Math.cos(f),-66-8*Math.sin(f),-22,-88],L:[hx,hy,hx+30,hy+2]})}
 function rope(T){c.save();c.translate(0,-12+Math.sin(T*3)*4);line(12,-152,12,-96,'#8a5a2b',3);gsack(-8,-48,9);
-  fig({h:[6,-80],n:[6,-68],p:[6,-34],l:[[3,-18,0,0,8,0],[9,-18,8,0,16,0]],a:[[-2,-86,12,-102],[14,-84,12,-98]]});c.restore()}
-function wrist(T){blk(34,-102,40,5,'#6b4423');const t=(T*.8)%1;gsack(20+26*t,-66-38*t-14*Math.sin(t*Math.PI),8);
-  fig(base({a:[[4,-68,14,-66],[-3,-66,-4,-46]]}))}
+  fig({h:[6,-80],n:[6,-68],p:[6,-34],l:[[3,-18,0,0,8,0],[9,-18,8,0,16,0]],a:[[-2,-86,12,-102],[14,-84,12,-98]]});
+  lab({F:[-2,-86,-26,-82],E:[2,-93,-26,-106],L:[12,-100,38,-88]});c.restore()}
+function wrist(T){blk(40,-104,40,5,'#6b4423');const t=(T*.8)%1;gsack(34+18*t,-72-36*t-14*Math.sin(t*Math.PI),8);
+  fig(base({a:[[6,-68,24,-68],[-3,-66,-4,-46]]}));line(24,-68,32,-72,INK,5);
+  lab({F:[24,-68,24,-46],E:[14,-70,12,-98],L:[32,-72,52,-52]})}
 function neck(T){const s=Math.sin(T*3)*1.5;blk(-30,-152,56,5,'#8fc4e8');line(-30,-152,26,-152,'#555',2);
-  gsack(-4,-116+s,9);fig(base({h:[-6,-99+s],fx:-3,fy:5}))}
-function headbal(T){for(let i=0;i<4;i++)gbar(0,-115-i*5,30-i*3,4);fig(base({fx:3,fy:5}))}
+  gsack(-4,-116+s,9);fig(base({h:[-6,-99+s],fx:-3,fy:5}));lab({F:[0,-88,-28,-80],E:[-9,-94,-32,-106],L:[-3,-116+s,26,-122]})}
+function headbal(T){for(let i=0;i<4;i++)gbar(0,-115-i*5,30-i*3,4);fig(base({fx:3,fy:5}));
+  lab({F:[0,-90,-28,-82],E:[-9,-96,-32,-108],L:[0,-118,32,-112]})}
 function kick(T){const e=wave(T,3),fx=28+12*e;blk(54,-80,7,80,'#6b4423');
-  fig(base({l:[[-2,-26,-4,0],[14,-48,fx,-44,fx+7,-44]],a:[[-8,-72,-18,-62],[8,-72,16,-80]]}));gbar(fx+3,-44,13,10)}
-function hipflex(T){const e=wave(T,3);blk(50,-56,6,56,'#8b8f99');
+  fig(base({l:[[-2,-26,-4,0],[14,-48,fx,-44,fx+7,-44]],a:[[-8,-72,-18,-62],[8,-72,16,-80]]}));gbar(fx+3,-44,13,10);
+  lab({F:[14,-48,34,-72],E:[8,-50,-22,-40],L:[fx+3,-44,fx+3,-18]})}
+function hipflex(T){const e=wave(T,3);blk(52,-56,6,56,'#8b8f99');
   const kx=14+6*e,ky=-52+4*e,fx=kx-4,fy=ky+26;fig(base({l:[[-2,-26,-4,0],[kx,ky,fx,fy,fx+8,fy]]}));
-  for(let i=1;i<=4;i++){c.strokeStyle=GD;c.lineWidth=2;c.fillStyle=GOLD;c.beginPath();c.arc(kx+(fx-kx)*i/4,ky+(fy-ky)*i/4,3.5,0,7);c.fill();c.stroke()}}
+  for(let i=1;i<=4;i++){c.strokeStyle=GD;c.lineWidth=2;c.fillStyle=GOLD;c.beginPath();c.arc(kx+(fx-kx)*i/4,ky+(fy-ky)*i/4,3.5,0,7);c.fill();c.stroke()}
+  lab({F:[kx,ky,36,-70],E:[5,-50,-24,-52],L:[(kx+fx)/2,(ky+fy)/2,38,-26]})}
 function hamstring(T){const th=-1.2+1.9*wave(T,3),fx=4-24*Math.cos(th),fy=-28-24*Math.sin(th);blk(-44,-56,5,26,'#6b4423');
-  fig(base({l:[[-2,-26,-4,0],[4,-28,fx,fy,fx-7,fy]]}));gbar(fx,fy,9,6)}
+  fig(base({l:[[-2,-26,-4,0],[4,-28,fx,fy,fx-7,fy]]}));gbar(fx,fy,9,6);
+  lab({F:[4,-28,28,-38],E:[0,-36,-22,-68],L:[fx,fy,fx-14,fy+26]})}
 function dorsi(T){const e=wave(T,3),tx=18,ty=-8-12*e;
-  fig(base({l:[[-3,-26,-5,0],[3,-26,5,-8,tx,ty]]}));blk(tx-6,ty-16,20,14,'#7a5a3a');line(tx-6,ty-9,tx+14,ty-9,GOLD,3)}
+  fig(base({l:[[-3,-26,-5,0],[3,-26,5,-8,tx,ty]]}));blk(tx-6,ty-16,20,14,'#7a5a3a');line(tx-6,ty-9,tx+14,ty-9,GOLD,3);
+  lab({F:[5,-8,-26,-8],E:[4,-18,30,-56],L:[tx,ty,48,-4]})}
 function over(T,v){const w=wave(T,2.2),psi=1.57+.85*w,ex=6,ey=-106,hx=ex+24*Math.cos(psi),hy=ey-24*Math.sin(psi);
   if(v==='hatch'){blk(-14,hy-14,44,6,'#6b4423');gbar(-2,hy-21,16,7);gbar(14,hy-21,16,7)}else{blk(58,-60,5,60,'#8b8f99');gbar(hx+3,hy-4,26,7)}
-  fig(base({a:[[ex,ey,hx,hy],[-3,-66,-4,-46]]}))}
+  fig(base({a:[[ex,ey,hx,hy],[-3,-66,-4,-46]]}));lab({F:[6,-106,-28,-108],E:[3,-98,-28,-130],L:[hx,hy,hx+32,hy+14]})}
 function wings(T){const s=Math.sin(T*3)*2;gsack(-54,-76+s,9);gsack(54,-76+s,9);
-  fig(base({a:[[-26,-88+s,-48,-86+s],[26,-88+s,48,-86+s]]}))}
-function jaw(T){line(30,-93,30,-80,GD,2);gsack(30,-72,8);gbar(21,-93,18,6);fig(base({fx:5,fy:-3}))}
+  fig(base({a:[[-26,-88+s,-48,-86+s],[26,-88+s,48,-86+s]]}));lab({F:[26,-88+s,24,-112],E:[34,-88+s,46,-112],L:[54,-76+s,54,-52]})}
+function jaw(T){line(30,-93,30,-80,GD,2);gsack(30,-72,8);gbar(21,-93,18,6);fig(base({fx:5,fy:-3}));
+  lab({F:[-2,-97,-28,-106],E:[2,-93,-28,-84],L:[21,-93,46,-104]})}
 function oneleg(T){blk(-14,0,20,5,'#6b4423');gsack(-14,-74,12);
-  fig(base({l:[[-1,-26,-2,0,6,0],[16,-44,10,-22,17,-22]],a:[[-16,-80,-32,-72],[16,-80,32,-72]]}))}
+  fig(base({l:[[-1,-26,-2,0,6,0],[16,-44,10,-22,17,-22]],a:[[-16,-80,-32,-72],[16,-80,32,-72]]}));
+  lab({F:[0,-52,-32,-34],E:[-6,-54,-34,-58],L:[0,-62,34,-62]})}
 function arch(T){const e=wave(T,2.5);gbar(2,-24-5*e,28,13,-.35);
-  fig({h:[32,-42-8*e],n:[20,-28-6*e],p:[-12,-8],fx:3,l:[[-30,-6,-54,-4,-60,-4]],a:[[22,-16,18,-2]]})}
+  fig({h:[32,-42-8*e],n:[20,-28-6*e],p:[-12,-8],fx:3,l:[[-30,-6,-54,-4,-60,-4]],a:[[22,-16,18,-2]]});
+  lab({F:[-2,-10,-16,14],E:[8,-20,-24,-34],L:[4,-28-5*e,6,-58]})}
 function generic(T){gsack(22,-52,9);fig(base({a:[[6,-68,18,-58],[-3,-66,-4,-46]]}));c.fillStyle=INK;c.font='bold 30px system-ui';c.textAlign='center';c.fillText('?',4,-122)}
 const ACT={tiptoe:T=>tip(T,'reach'),museum:T=>tip(T,'statue'),stairs:T=>tip(T,'stairs'),skip:T=>tip(T,'skip'),sprint,pushoff:jump,pushup:plank,biceps:curl,rope,wrist,neck,headbal,knee:kick,hipflex,hamstring,dorsi,triceps:T=>over(T,'hatch'),throw:T=>over(T,'throw'),shoulder:wings,jaw,hipbal:oneleg,trunk:arch};
 function drawBubble(T){
@@ -605,7 +625,7 @@ function pickClaims(level){
 }
 function startCustom(){const pool=shuffle(S.custom);startTrial({claims:pool.slice(0,4)})}
 function startTrial(o){
-  o=(o&&o.claims&&o.claims.length)?o:null;G.opts=o;G.lucky=0;G.bubble=false;
+  o=(o&&o.claims&&o.claims.length)?o:null;G.opts=o;G.lucky=0;G.bubble=false;G.labels=false;
   closeModal();newCast();
   const lv=S.level,detail=o?2:(lv<=2?0:lv<=4?1:2);
   G.detail=detail;G.trial={level:lv,claims:o?o.claims:pickClaims(lv),idx:0,title:o?'The Custom Case':pick(CASES),detail,custom:!!o};
@@ -621,7 +641,7 @@ function showClaim(){
   const tr=G.trial;G.claim=tr.claims[tr.idx];G.phase='arrange';G.hint=0;G.tries=0;G.firstTry=true;G.expertTarget=0;G.ang=0;G.anim=null;
   G.profMood='smug';G.youMood='';G.juryMood='idle';resetTokens();
   const pre='<i>Claim '+(tr.idx+1)+' of '+tr.claims.length+'</i><br>';
-  G.bubble=true;G.bubbleT=performance.now()/1000;
+  G.bubble=true;G.labels=false;G.bubbleT=performance.now()/1000;
   G.phase='quiz';
   ui('Prosecutor',pre+'“'+G.claim.say+'”','Before the demonstration, the judge will ask you a <b>recall</b> question. Answer from memory.',
     [{t:'Answer the judge ▶',c:'primary',f:()=>runQuiz([Math.random()<.5?classQ(G.claim):fulcQ(G.claim)],()=>{G.phase='arrange';G.expertTarget=0;refreshArrange(pre)})}]);
@@ -661,13 +681,14 @@ function present(){
   G.anim={t0:performance.now()/1000,dur:r.lifted?2.0:1.8,lift:r.lifted,dir,target:.2,done:()=>{if(!r.lifted)sfx.thud();setTimeout(()=>outcome(r),r.lifted?500:350)}};
 }
 function torqueTxt(r){return 'Effort torque = '+G.claim.E+' × '+r.dE+' cm = <b>'+r.tE+'</b> · Load torque = '+G.claim.L+' × '+r.dL+' cm = <b>'+r.tL+'</b> kgf·cm.'}
+function showLabelled(){G.bubble=true;G.labels=true;G.bubbleT=performance.now()/1000}
 function outcome(r){
-  G.bubble=false;
+  G.bubble=false;G.labels=false;
   const cl=G.claim,st=S.stats[cl.cls];
   const mine=ord[r.cl]+'-class (MA = '+(r.ma===.5?'0.5':r.ma)+')',real=ord[cl.cls]+'-class';
   const realTxt='The '+cl.joint.toLowerCase()+' is a <b>'+real+' lever</b>: Fulcrum = '+cl.F+'; Effort = '+cl.Ef+'; Load = '+cl.Lo+'. The <b>'+MIDDLE[cl.cls]+'</b> sits in the middle.';
   if(r.correct){
-    st.ok++;G.lucky=0;G.phase='won-claim';G.juryMood='cheer';G.juryUntil=performance.now()/1000+2.6;G.profMood='angry';G.youMood='cheer';G.clientMood='cheer';sfx.cheer();
+    st.ok++;G.lucky=0;G.phase='won-claim';showLabelled();G.juryMood='cheer';G.juryUntil=performance.now()/1000+2.6;G.profMood='angry';G.youMood='cheer';G.clientMood='cheer';sfx.cheer();
     banner('IMPOSSIBLE!','#7cf0b8','The claim fails',1.7);
     const gain=G.firstTry?25:15;addRep(gain);floater('+'+gain+' rep','#ffe27a',110,330);
     ui('You','The see-saw proves it: the <b>'+real+' lever</b> cannot do what the prosecution claims. '+(G.detail>=1?torqueTxt(r)+' The effort loses, so the claim is <b>physically impossible</b>.':'The effort cannot overcome the load, so the claim is <b>physically impossible</b>!'),realTxt,[{t:'Continue',c:'primary',f:()=>afterClaim()}]);
@@ -678,9 +699,9 @@ function outcome(r){
     banner('OBJECTION!','#ffd45a','Expert witness',1.6,-.06);addRep(-10);floater('−10 rep','#ffb3b3',110,330);
     ui('Expert','“Your Honor, the defense got <b>lucky</b>! Their see-saw looks like a <b>'+mine+'</b> lever, but that is not how the body works. '+realTxt+'”',
       '“The verdict would be thrown out because the model is wrong. Rebuild it correctly.” <b>⚠ Warning: one more incorrect model and the judge will declare a mistrial.</b> '+(G.detail>=1?'(Your model: '+torqueTxt(r)+')':''),
-      [{t:'↺ Try again',c:'primary',f:()=>{G.expertTarget=0;G.youMood='';G.phase='arrange';G.bubble=true;G.bubbleT=performance.now()/1000;resetTokens();refreshArrange()}}]);
+      [{t:'↺ Try again',c:'primary',f:()=>{G.expertTarget=0;G.youMood='';G.phase='arrange';G.bubble=true;G.labels=false;G.bubbleT=performance.now()/1000;resetTokens();refreshArrange()}}]);
   }else{
-    st.bad++;G.phase='lost';G.jailed=true;G.juryMood='gasp';G.juryUntil=performance.now()/1000+3;G.judgeMood='angry';G.profMood='smug';G.youMood='shock';G.clientMood='shock';G.gavelT=performance.now()/1000;sfx.gavel();sfx.gasp();
+    st.bad++;G.phase='lost';showLabelled();G.jailed=true;G.juryMood='gasp';G.juryUntil=performance.now()/1000+3;G.judgeMood='angry';G.profMood='smug';G.youMood='shock';G.clientMood='shock';G.gavelT=performance.now()/1000;sfx.gavel();sfx.gasp();
     banner('GUILTY!','#ff6b6b','Your client goes to jail',2.4);
     ui('Judge','The jury watched the load rise! Your model made the effort look strong enough, so the verdict is <b>GUILTY</b>. Your client is taken away. Trial lost.',
       '<b>What went wrong:</b> you built a <b>'+mine+'</b> lever, which exaggerated the effort. '+(G.detail>=1?torqueTxt(r)+' ':'')+realTxt,
@@ -689,7 +710,7 @@ function outcome(r){
   }
 }
 function mistrial(mine,realTxt,r){
-  G.phase='lost';G.expertTarget=1;G.juryMood='gasp';G.juryUntil=performance.now()/1000+2.5;G.judgeMood='angry';G.youMood='shock';G.profMood='';G.gavelT=performance.now()/1000;sfx.gavel();sfx.bad();
+  G.phase='lost';showLabelled();G.expertTarget=1;G.juryMood='gasp';G.juryUntil=performance.now()/1000+2.5;G.judgeMood='angry';G.youMood='shock';G.profMood='';G.gavelT=performance.now()/1000;sfx.gavel();sfx.bad();
   banner('MISTRIAL!','#ffb347','Trial failed',2.4);addRep(-15);floater('−15 rep','#ffb3b3',110,330);
   ui('Judge','Counsel has now presented an <b>incorrect lever model twice in a row</b>. A correct argument cannot be built on the wrong lever, even when the demonstration happens to favour the defense. I declare a <b>MISTRIAL</b>. The trial is failed.',
     '<b>What went wrong:</b> you built a <b>'+mine+'</b> lever. '+realTxt,
@@ -697,6 +718,7 @@ function mistrial(mine,realTxt,r){
   save();
 }
 function afterClaim(){
+  G.bubble=false;G.labels=false;
   const cl=G.claim,quizzes=[];
   if(G.detail>=1)quizzes.push(anatomyQ(cl));
   if(G.detail>=2)quizzes.push(maQ(cl));
