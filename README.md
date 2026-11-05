@@ -26,3 +26,14 @@ the first time a student creates their lawyer.
 The textbook figures used in the review are in `img/`. If you do not have permission
 to publish them, delete the files in `img/`; the pages still work (the diagrams drawn
 in the game remain, the textbook pictures are simply hidden).
+
+## Keeping your character on another device
+Progress is saved automatically in the browser you are using. To move it to a phone or
+another Chromebook, open Menu → **Save / transfer my character** and use any of:
+- **Copy code**, then paste it into **Load a character** on the other device
+- **Copy link**: opening the link on the other device offers to load the character
+- **Show QR code**: scan it with a phone camera
+- **Download file** / **Load from file**
+
+Loading a save replaces the character on that device, so save the old one first if you
+want to keep it. Third-party code: `lib/qrcode.js` is qrcode-generator by Kazuhiko Arase (MIT licence).

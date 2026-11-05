@@ -216,7 +216,7 @@ const RANKS=[[0,'Law Student'],[100,'Junior Associate'],[300,'Attorney'],[700,'S
 /* ================= save (localStorage + cookie backup) ================= */
 const KEY='leverLawyerSave_v1';
 const DEF=()=>({created:false,look:{skin:2,hair:1,hairCol:1,eyes:0,brows:1,nose:0,mouth:0},suit:'drab',mat:'wood',
-  ownS:['drab'],ownM:['wood'],rep:0,fame:0,level:1,best:0,stats:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},quiz:{ok:0,bad:0},review:{ok:0,bad:0,paid:false},recall:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},name:'',custom:[],muted:false});
+  ownS:['drab'],ownM:['wood'],rep:0,fame:0,level:1,best:0,stats:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},exLevel:0,quiz:{ok:0,bad:0},review:{ok:0,bad:0,paid:false},recall:{1:{ok:0,bad:0},2:{ok:0,bad:0},3:{ok:0,bad:0}},name:'',custom:[],muted:false});
 let S=DEF();
 function load(){let s=null;
   try{s=localStorage.getItem(KEY)}catch(e){}
@@ -768,8 +768,8 @@ function trialWon(){
   G.phase='won';G.juryMood='cheer';G.juryUntil=performance.now()/1000+4;G.youMood='cheer';G.clientMood='cheer';G.profMood='angry';G.judgeMood='';G.gavelT=performance.now()/1000;sfx.gavel();setTimeout(sfx.cheer,300);
   banner('NOT GUILTY!','#7cf0b8','Case dismissed',2.4);floater('+'+bonus+' rep','#ffe27a',110,330);
   ui('Judge','The jury has seen the physics. <b>Not guilty</b>; the case is dismissed! You earned <b>'+bonus+' reputation</b>.',
-    'Spend reputation on new suits and see-saws in the shop. Next up: Trial '+S.level+' ('+(S.level<3?'1':[0,0,0,'2','2','3','3','3'][Math.min(S.level,7)]||'4')+' claim'+(S.level<3?'':'s')+').',
-    [{t:'Next trial ▶',c:'primary',f:startTrial},{t:'🛍 Shop & style',f:()=>openCustomize(false)},{t:'Menu',f:openMenu}]);
+    'Spend reputation on new suits and see-saws in the shop. Next up: Trial '+S.level+' ('+(S.level<3?'1':[0,0,0,'2','2','3','3','3'][Math.min(S.level,7)]||'4')+' claim'+(S.level<3?'':'s')+').'+((S.exLevel===0||S.level-S.exLevel>=2)?'<br>💾 <b>Tip:</b> save your character code so you can continue on another device.':''),
+    [{t:'Next trial ▶',c:'primary',f:startTrial},{t:'🛍 Shop & style',f:()=>openCustomize(false)},{t:'💾 Save character',f:openSave},{t:'Menu',f:openMenu}]);
 }
 
 /* ================= input (drag / tap) ================= */
@@ -817,6 +817,7 @@ function openMenu(){
   m.appendChild(btn('📚 Review the basics (levers)','',()=>openReview(false)));
   m.appendChild(btn('🎨 Customize lawyer & shop','',()=>openCustomize(false)));
   m.appendChild(btn('📁 Case file (progress)','',openStats));
+  m.appendChild(btn('💾 Save / transfer my character','',openSave));
   if(S.custom.length)m.appendChild(btn('📝 Practice my teacher\'s custom claims ('+S.custom.length+')','',startCustom));
   m.appendChild(btn('📤 Submit results to teacher','',openSubmit));
   m.appendChild(btn('🧑‍🏫 Teacher tools','',openTeacher));
@@ -1085,11 +1086,81 @@ function openReview(first,after){
     nv.appendChild(btn(after?'Skip: restart trial':first&&i===0?'Skip review':'✕ Close','',()=>{if(after)after();else{closeModal();openMenu()}}))}
   show(0)}
 
+/* ================= save / transfer character ================= */
+function makeSave(){const o=Object.assign({},S);delete o.exLevel;const j=JSON.stringify(o);return 'LLS1.'+b64e(j)+'.'+chk(j)}
+function saveLink(){return location.href.split('#')[0]+'#save='+makeSave()}
+function sanitizeSave(o){
+  if(!o||typeof o!=='object')return null;
+  const d=DEF(),num=(v,lo,hi,def)=>{v=Math.floor(+v);return Number.isFinite(v)?clamp(v,lo,hi):def};
+  const out=d,L=o.look||{},lim={skin:SKINS.length,hair:HAIRS.length,hairCol:HAIRC.length,eyes:EYES.length,brows:BROWS.length,nose:NOSES.length,mouth:MOUTHS.length};
+  for(const k in lim)out.look[k]=num(L[k],0,lim[k]-1,d.look[k]);
+  const sids=SUITS.map(x=>x.id),mids=MATS.map(x=>x.id);
+  out.suit=sids.includes(o.suit)?o.suit:'drab';out.mat=mids.includes(o.mat)?o.mat:'wood';
+  out.ownS=[...new Set(['drab',out.suit].concat((Array.isArray(o.ownS)?o.ownS:[]).filter(x=>sids.includes(x))))];
+  out.ownM=[...new Set(['wood',out.mat].concat((Array.isArray(o.ownM)?o.ownM:[]).filter(x=>mids.includes(x))))];
+  out.rep=num(o.rep,0,1e7,0);out.fame=num(o.fame,0,1e7,0);out.level=num(o.level,1,1e4,1);out.best=num(o.best,0,1e4,0);out.exLevel=num(o.exLevel,0,1e4,0);
+  const pair=(src,k)=>({ok:num(src&&src[k]&&src[k].ok,0,1e6,0),bad:num(src&&src[k]&&src[k].bad,0,1e6,0)});
+  for(const k of[1,2,3]){out.stats[k]=pair(o.stats,k);out.recall[k]=pair(o.recall,k)}
+  out.quiz={ok:num(o.quiz&&o.quiz.ok,0,1e6,0),bad:num(o.quiz&&o.quiz.bad,0,1e6,0)};
+  out.review={ok:num(o.review&&o.review.ok,0,1e6,0),bad:num(o.review&&o.review.bad,0,1e6,0),paid:!!(o.review&&o.review.paid)};
+  out.name=String(o.name||'').replace(/[<>&]/g,'').trim().slice(0,30);
+  out.custom=(Array.isArray(o.custom)?o.custom:[]).map(cleanClaim).filter(Boolean).slice(0,200);
+  out.created=true;out.muted=!!o.muted;return out}
+function parseSave(text){
+  const m=String(text||'').match(/LLS1\.([A-Za-z0-9_-]+)\.([0-9a-z]{4})/);
+  if(!m)return{err:'That does not look like a Lever Lawyer save code or link.'};
+  try{const j=b64d(m[1]);if(chk(j)!==m[2])return{err:'This code looks damaged or incomplete. Copy it again, including every character.'};
+    const o=sanitizeSave(JSON.parse(j));return o?{sv:o}:{err:'This save could not be read.'}}
+  catch(e){return{err:'This save could not be read.'}}}
+function confirmLoad(sv,back){
+  const hasOwn=S.created&&(S.rep>0||S.best>0||S.level>1);
+  const card=openModal('<h2>💾 Load this character?</h2><p><b>'+esc(sv.name||'(no name)')+'</b> · Trial '+sv.level+' · ⭐ '+sv.rep+' reputation</p>'+(hasOwn?'<p class="sub" style="color:#ffb3b3">This will <b>replace</b> the character currently on this device ('+esc(S.name||'(no name)')+', Trial '+S.level+', ⭐ '+S.rep+'). Save its code first if you want to keep it.</p>':'')+'<div class="row"></div>');
+  const row=card.querySelector('.row');
+  row.appendChild(btn('✔ Load this character','primary',()=>{S=sv;save();rebuildClaims();hud();closeModal();openMenu()}));
+  row.appendChild(btn('Cancel','',back||(()=>{closeModal();openMenu()})))}
+function importFromHash(){
+  const m=location.hash.match(/^#save=(.+)$/);if(!m)return false;
+  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+  const r=parseSave(m[1]);
+  if(r.sv){confirmLoad(r.sv,()=>{closeModal();if(!S.created)openCustomize(true);else openMenu()});return true}
+  const card=openModal('<h2>💾 Could not load character</h2><p>'+esc(r.err)+'</p><div class="row"></div>');
+  card.querySelector('.row').appendChild(btn('OK','primary',()=>{closeModal();if(!S.created)openCustomize(true);else openMenu()}));return true}
+function loadQR(cb){if(window.qrcode)return cb(true);const s=document.createElement('script');s.src='lib/qrcode.js';s.onload=()=>cb(!!window.qrcode);s.onerror=()=>cb(false);document.head.appendChild(s)}
+function qrSvg(text){
+  const qr=qrcode(0,'L');qr.addData(text);qr.make();const n=qr.getModuleCount();let d='';
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(qr.isDark(r,c))d+='M'+c+' '+r+'h1v1h-1z';
+  return '<svg viewBox="-4 -4 '+(n+8)+' '+(n+8)+'" style="width:100%;max-width:260px" shape-rendering="crispEdges"><rect x="-4" y="-4" width="'+(n+8)+'" height="'+(n+8)+'" fill="#fff"/><path d="'+d+'" fill="#000"/></svg>'}
+function openSave(){
+  const card=openModal(`<h2>💾 Save &amp; transfer my character</h2><p class="sub">Your character is saved on <b>this device</b> automatically. To keep playing on another device (phone, another Chromebook), copy your code, link or file here, then load it there.</p>
+  <div class="grp"><label>Your save code</label><textarea id="sv" class="txt" rows="3" readonly></textarea></div><div class="row" id="sr"></div><p class="sub" id="smsg"></p><div id="qrbox"></div>
+  <h3>Load a character</h3><div class="grp"><label>Paste a save code or link</label><textarea id="ld" class="txt" rows="2" placeholder="LLS1.…"></textarea></div><div class="row" id="lr"></div><p class="sub" id="lmsg" style="color:#ffb3b3"></p><div class="row" id="bk"></div>`);
+  const sv=card.querySelector('#sv'),msg=card.querySelector('#smsg'),qb=card.querySelector('#qrbox'),ld=card.querySelector('#ld'),lm=card.querySelector('#lmsg');
+  sv.value=makeSave();const mark=()=>{S.exLevel=S.level;save()};
+  const copyStr=(t,label)=>{const x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0';document.body.appendChild(x);copyText(x,null);x.remove();msg.textContent=label+' copied ✔';mark()};
+  const sr=card.querySelector('#sr');
+  sr.appendChild(btn('📋 Copy code','primary',()=>{copyText(sv,msg);msg.textContent='Code copied ✔';mark()}));
+  sr.appendChild(btn('🔗 Copy link','',()=>copyStr(saveLink(),'Link')));
+  sr.appendChild(btn('⬇ Download file','',()=>{const b=new Blob([makeSave()],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='lever-lawyer-'+((S.name||'character').replace(/[^A-Za-z0-9_-]+/g,'_')||'character')+'.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);msg.textContent='File downloaded ✔';mark()}));
+  sr.appendChild(btn('▦ Show QR code','',()=>{
+    if(qb.innerHTML){qb.innerHTML='';return}
+    qb.innerHTML='<p class="sub">Making QR code…</p>';
+    loadQR(ok=>{if(!ok){qb.innerHTML='<p class="sub" style="color:#ffb3b3">The QR code could not be made here. Use the link or file instead.</p>';return}
+      try{qb.innerHTML='<div class="paper">'+qrSvg(saveLink())+'</div><p class="fig">Scan with a phone camera to open the game with this character. (Use the same web address as the game.)</p>';mark()}
+      catch(e){qb.innerHTML='<p class="sub" style="color:#ffb3b3">Your save is too large for a QR code. Use the link or file instead.</p>'}})}));
+  const lr=card.querySelector('#lr');
+  const tryLoad=t=>{const r=parseSave(t);if(r.sv){lm.textContent='';confirmLoad(r.sv,openSave)}else lm.textContent=r.err};
+  lr.appendChild(btn('Load from pasted code','primary',()=>tryLoad(ld.value)));
+  const fi=document.createElement('input');fi.type='file';fi.accept='.txt,.json,text/plain';fi.style.display='none';
+  fi.onchange=()=>{const f=fi.files&&fi.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>tryLoad(String(rd.result));rd.onerror=()=>{lm.textContent='Could not read that file.'};rd.readAsText(f.slice(0,200000))};
+  card.appendChild(fi);lr.appendChild(btn('📂 Load from file','',()=>fi.click()));
+  card.querySelector('#bk').appendChild(btn('Back','',()=>{closeModal();openMenu()}))}
+
 /* ================= boot ================= */
 function boot(){
   load();hud();newCast();
   G.phase='idle';G.detail=0;G.claim=null;
   ui('Court','Welcome to the courtroom, counsel! Open the menu to begin.','',[{t:'☰ Menu',c:'primary',f:openMenu}]);
+  if(importFromHash())return;
   if(!S.created)openCustomize(true);else openMenu();
 }
 $('#bMenu').onclick=openMenu;
