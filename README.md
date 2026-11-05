@@ -43,3 +43,5 @@ The review page **Where is the effort? Muscle insertions** has six simplified, o
 diagrams (biceps, triceps, calf, quadriceps, neck, deltoid) with the muscle insertion
 highlighted as the effort location. After a claim is resolved, a **See the anatomy**
 button opens the matching diagram for claims about those joints.
+
+**Where to find the anatomy diagrams:** Menu → *Anatomy: where is the effort?*, the *Anatomy diagram* button that appears after taking a hint during a claim, and the *See the anatomy* button after a claim is resolved.

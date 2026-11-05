@@ -139,77 +139,77 @@ const MATS=[
 /* Each claim is a sham: with the TRUE lever arrangement the effort torque is smaller than the load torque.
    Teaching model: slots on the see-saw are 10 cm apart -> class 1 MA=1, class 2 MA=2, class 3 MA=0.5. */
 const BASE_CLAIMS=[
- {id:'tiptoe',joint:'Ankle (standing on tiptoes)',cls:2,E:60,L:170,
+ {id:'tiptoe',prop:'gold',joint:'Ankle (standing on tiptoes)',cls:2,E:60,L:170,
   say:"Your Honor, the accused stood on their tippy toes to reach the escape hatch from the vault... while carrying ALL of the gold!",
   F:'Ball of the foot (metatarsophalangeal joint)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight (plus the gold) acting down through the ankle'},
- {id:'biceps',joint:'Elbow (biceps curl)',cls:3,E:20,L:26,
-  say:"The evidence is clear! The accused lifted the heavy gold bar to shoulder height with one arm, hand at the end of the forearm!",
-  F:'Elbow joint',Ef:'Biceps pulling on the forearm just below the elbow',Lo:'Weight of the gold bar plus the forearm, held in the hand'},
- {id:'neck',joint:'Neck (tilting the head back)',cls:1,E:25,L:40,
-  say:"The accused balanced a sack of gold on their forehead, then tipped the head back to peer up through the skylight!",
-  F:'Atlanto-occipital joint (skull on the top vertebra)',Ef:'Neck extensor muscles pulling on the back of the skull',Lo:'Weight of the face and the gold, in front of the joint'},
- {id:'knee',joint:'Knee (extension / kick)',cls:3,E:40,L:60,
-  say:"The accused kicked the vault door open while wearing boots filled with gold!",
-  F:'Knee joint',Ef:'Quadriceps pulling through the patellar tendon just below the knee',Lo:'Weight of the lower leg, boot and gold at the foot'},
- {id:'triceps',joint:'Elbow (triceps extension)',cls:1,E:30,L:50,
-  say:"The accused locked out one elbow and shoved up a hatch piled high with gold bars, using only the triceps!",
-  F:'Elbow joint',Ef:'Triceps pulling on the olecranon behind the joint',Lo:'The hatch and gold pressing down on the hand'},
- {id:'pushup',joint:'Whole body (push-up)',cls:2,E:50,L:130,
-  say:"The accused cranked out a push-up with the whole stack of gold strapped to their back!",
-  F:'Toes touching the floor',Ef:'Triceps and chest muscles pushing through the hands',Lo:'Body weight (plus gold) acting at the centre of mass'},
- {id:'shoulder',joint:'Shoulder (raising the arm sideways)',cls:3,E:22,L:30,
-  say:"The accused held two heavy bags of gold straight out to the sides at arm's length, like wings!",
-  F:'Shoulder (glenohumeral) joint',Ef:'Deltoid pulling on the upper arm close to the joint',Lo:'Weight of the arm and the gold bag held out in the hand'},
- {id:'hipbal',joint:'Hip (balancing on one leg)',cls:1,E:35,L:60,
-  say:"The accused balanced on one leg on the narrow ledge, with a gold-stuffed backpack, without even wobbling!",
+ {id:'biceps',prop:'tv',joint:'Elbow (biceps curl)',cls:3,E:20,L:26,
+  say:"The evidence is clear! The accused curled a stolen flat-screen TV up to shoulder height with one arm and passed it out through the window!",
+  F:'Elbow joint',Ef:'Biceps pulling on the forearm just below the elbow',Lo:'Weight of the stolen TV plus the forearm, held in the hand'},
+ {id:'neck',prop:'vase',joint:'Neck (tilting the head back)',cls:1,E:25,L:40,
+  say:"The accused balanced a stolen antique vase on their forehead, then tipped the head back to peer up through the skylight!",
+  F:'Atlanto-occipital joint (skull on the top vertebra)',Ef:'Neck extensor muscles pulling on the back of the skull',Lo:'Weight of the face and the vase, in front of the joint'},
+ {id:'knee',prop:'jewel',joint:'Knee (extension / kick)',cls:3,E:40,L:60,
+  say:"The accused kicked the warehouse door off its hinges while wearing boots stuffed with stolen jewelry!",
+  F:'Knee joint',Ef:'Quadriceps pulling through the patellar tendon just below the knee',Lo:'Weight of the lower leg, boot and jewelry at the foot'},
+ {id:'triceps',prop:'safe',joint:'Elbow (triceps extension)',cls:1,E:30,L:50,
+  say:"The accused locked out one elbow and shoved up the stuck cellar hatch with a stolen safe sitting on top of it, using only the triceps!",
+  F:'Elbow joint',Ef:'Triceps pulling on the olecranon behind the joint',Lo:'The hatch and the safe pressing down on the hand'},
+ {id:'pushup',prop:'laptop',joint:'Whole body (push-up)',cls:2,E:50,L:130,
+  say:"The accused cranked out a push-up with a stack of stolen laptops strapped to their back!",
+  F:'Toes touching the floor',Ef:'Triceps and chest muscles pushing through the hands',Lo:'Body weight (plus the laptops) acting at the centre of mass'},
+ {id:'shoulder',prop:'painting',joint:'Shoulder (raising the arm sideways)',cls:3,E:22,L:30,
+  say:"The accused held two stolen paintings straight out to the sides at arm's length, like wings, to slip them through a narrow doorway!",
+  F:'Shoulder (glenohumeral) joint',Ef:'Deltoid pulling on the upper arm close to the joint',Lo:'Weight of the arm and the painting held out in the hand'},
+ {id:'hipbal',prop:'bag',joint:'Hip (balancing on one leg)',cls:1,E:35,L:60,
+  say:"The accused balanced on one leg on the narrow ledge, with a backpack stuffed with stolen jewelry, without even wobbling!",
   F:'Hip joint of the standing leg',Ef:'Hip abductor muscles (gluteus medius) pulling on the pelvis',Lo:'Body weight and backpack acting through the centre of mass'},
- {id:'pushoff',joint:'Ankle (push-off from the toes)',cls:2,E:70,L:190,
-  say:"The accused launched off the toes of one foot to leap the wall, shoulders loaded with gold!",
-  F:'Ball of the foot (toes on the ground)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the gold, pressing down through the ankle'},
- {id:'hipflex',joint:'Hip (lifting the leg)',cls:3,E:35,L:45,
-  say:"The accused swung a leg, wrapped in gold chains, up and over the wall in one smooth motion!",
-  F:'Hip joint',Ef:'Hip flexors (iliopsoas) pulling on the upper thigh',Lo:'Weight of the leg and the gold chains, centred below the knee'},
- {id:'jaw',joint:'Jaw (clamping the teeth)',cls:3,E:30,L:40,
-  say:"The accused dangled a heavy gold bar from their mouth, clamped between the teeth, all the way across the room!",
-  F:'Temporomandibular joint (jaw hinge)',Ef:'Masseter and temporalis pulling on the jaw near the hinge',Lo:'Weight of the gold bar gripped between the teeth'},
- {id:'rope',joint:'Elbow (hanging / climbing)',cls:3,E:30,L:20,
-  say:"The accused pulled themselves up the rope, hand over hand, with a sack of gold on one arm!",
-  F:'Elbow joint',Ef:'Biceps and brachialis pulling on the forearm near the elbow',Lo:'Body weight and the gold pulling on the hand'},
- {id:'dorsi',joint:'Ankle (lifting the toes up)',cls:3,E:18,L:20,
+ {id:'pushoff',prop:'bag',joint:'Ankle (push-off from the toes)',cls:2,E:70,L:190,
+  say:"The accused launched off the toes of one foot to leap the wall, shoulders loaded with a sack of stolen loot!",
+  F:'Ball of the foot (toes on the ground)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the loot, pressing down through the ankle'},
+ {id:'hipflex',prop:'chain',joint:'Hip (lifting the leg)',cls:3,E:35,L:45,
+  say:"The accused swung a leg, wrapped in a stolen bike chain, up and over the fence in one smooth motion!",
+  F:'Hip joint',Ef:'Hip flexors (iliopsoas) pulling on the upper thigh',Lo:'Weight of the leg and the chain, centred below the knee'},
+ {id:'jaw',prop:'crowbar',joint:'Jaw (clamping the teeth)',cls:3,E:30,L:40,
+  say:"The accused gripped a stolen crowbar between the teeth and carried it all the way across the room!",
+  F:'Temporomandibular joint (jaw hinge)',Ef:'Masseter and temporalis pulling on the jaw near the hinge',Lo:'Weight of the crowbar gripped between the teeth'},
+ {id:'rope',prop:'bag',joint:'Elbow (hanging / climbing)',cls:3,E:30,L:20,
+  say:"The accused hauled themselves up the drainpipe, hand over hand, with a bag of stolen goods on one arm!",
+  F:'Elbow joint',Ef:'Biceps and brachialis pulling on the forearm near the elbow',Lo:'Body weight and the bag pulling on the hand'},
+ {id:'dorsi',prop:'crate',joint:'Ankle (lifting the toes up)',cls:3,E:18,L:20,
   say:"The accused hooked the toes under the museum case and hoisted it clear off the floor, using only the shin muscle!",
   F:'Ankle joint',Ef:'Tibialis anterior pulling on the top of the foot',Lo:'Weight of the foot and the case, at the toes'},
- {id:'museum',joint:'Ankle (tiptoe walking)',cls:2,E:55,L:160,
-  say:"The accused crept silently along the gallery on tiptoes, cradling a solid gold statue in both arms!",
+ {id:'museum',prop:'statue',joint:'Ankle (tiptoe walking)',cls:2,E:55,L:160,
+  say:"The accused crept silently along the gallery on tiptoes, cradling a stolen marble statue in both arms!",
   F:'Ball of the foot (metatarsophalangeal joint)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the statue, pressing down through the ankle'},
- {id:'wrist',joint:'Wrist (flexing / flicking)',cls:3,E:16,L:24,
-  say:"The accused flicked the wrist and sent a sack of gold coins flying onto the top shelf!",
-  F:'Wrist joint',Ef:'Wrist flexor muscles pulling on the hand near the joint',Lo:'Weight of the hand and the sack, far from the wrist'},
- {id:'trunk',joint:'Spine (arching the back)',cls:1,E:30,L:55,
-  say:"The accused lay flat on the floor and arched the whole trunk off the ground with a gold chest strapped on top!",
+ {id:'wrist',prop:'jewel',joint:'Wrist (flexing / flicking)',cls:3,E:16,L:24,
+  say:"The accused flicked the wrist and sent a stolen watch box flying onto the top shelf!",
+  F:'Wrist joint',Ef:'Wrist flexor muscles pulling on the hand near the joint',Lo:'Weight of the hand and the watch box, far from the wrist'},
+ {id:'trunk',prop:'safe',joint:'Spine (arching the back)',cls:1,E:30,L:55,
+  say:"The accused lay flat on the floor and arched the whole trunk off the ground with a stolen safe strapped on top!",
   F:'Vertebral joints of the lower back',Ef:'Erector spinae muscles pulling behind the spine',Lo:'Weight of the head, arms and trunk in front of the joint'},
- {id:'sprint',joint:'Ankle (sprint start)',cls:2,E:65,L:180,
-  say:"The accused exploded off the starting blocks onto the toes, a pack of gold on their back, and cleared the fence in a single stride!",
-  F:'Ball of the foot (toes on the blocks)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the gold pack, through the ankle'},
- {id:'hamstring',joint:'Knee (bending the leg)',cls:3,E:36,L:50,
-  say:"The accused hooked a heel under the gate latch and curled the leg up to flip it, with a gold anklet on each foot!",
-  F:'Knee joint',Ef:'Hamstrings pulling on the back of the lower leg just below the knee',Lo:'Weight of the lower leg, foot and the gold anklet'},
- {id:'headbal',joint:'Neck (balancing a load on the head)',cls:1,E:28,L:45,
-  say:"The accused balanced a tower of gold plates on the head while gazing up at the clock, without a single wobble!",
+ {id:'sprint',prop:'laptop',joint:'Ankle (sprint start)',cls:2,E:65,L:180,
+  say:"The accused exploded off the starting blocks onto the toes, a pack of stolen electronics on their back, and cleared the fence in a single stride!",
+  F:'Ball of the foot (toes on the blocks)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the pack of electronics, through the ankle'},
+ {id:'hamstring',prop:'chain',joint:'Knee (bending the leg)',cls:3,E:36,L:50,
+  say:"The accused hooked a heel under the gate latch and curled the leg up to flip it, with a stolen bike chain wrapped around each foot!",
+  F:'Knee joint',Ef:'Hamstrings pulling on the back of the lower leg just below the knee',Lo:'Weight of the lower leg, foot and the chain'},
+ {id:'headbal',prop:'plates',joint:'Neck (balancing a load on the head)',cls:1,E:28,L:45,
+  say:"The accused balanced a tower of stolen dinner plates on the head while gazing up at the clock, without a single wobble!",
   F:'Atlanto-occipital joint (skull on the top vertebra)',Ef:'Neck extensor muscles pulling at the back of the skull',Lo:'Weight of the face and the plates in front of the joint'},
- {id:'stairs',joint:'Ankle (climbing on the toes)',cls:2,E:62,L:175,
-  say:"The accused bounded up the clocktower stairs on the toes of both feet, a gold-filled backpack on their shoulders!",
+ {id:'stairs',prop:'bag',joint:'Ankle (climbing on the toes)',cls:2,E:62,L:175,
+  say:"The accused bounded up the clocktower stairs on the toes of both feet, a backpack of stolen goods on their shoulders!",
   F:'Ball of the foot (toes on the stair)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the backpack, through the ankle'},
- {id:'throw',joint:'Elbow (overhead extension)',cls:1,E:28,L:48,
-  say:"The accused held a gold bar overhead and snapped the elbow straight with the triceps alone, hurling it over the fence!",
-  F:'Elbow joint',Ef:'Triceps pulling on the olecranon behind the joint',Lo:'Weight of the forearm and the bar, beyond the joint'},
- {id:'skip',joint:'Ankle (skipping rope)',cls:2,E:58,L:165,
-  say:"The accused skipped rope on the toes for ten minutes, with a belt of gold bars around the waist!",
-  F:'Ball of the foot (toes on the ground)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the gold belt, through the ankle'}
+ {id:'throw',prop:'trophy',joint:'Elbow (overhead extension)',cls:1,E:28,L:48,
+  say:"The accused held a stolen trophy overhead and snapped the elbow straight with the triceps alone, hurling it over the fence!",
+  F:'Elbow joint',Ef:'Triceps pulling on the olecranon behind the joint',Lo:'Weight of the forearm and the trophy, beyond the joint'},
+ {id:'skip',prop:'watches',joint:'Ankle (skipping rope)',cls:2,E:58,L:165,
+  say:"The accused skipped rope on the toes for ten minutes, with a belt of stolen watches around the waist!",
+  F:'Ball of the foot (toes on the ground)',Ef:'Calf muscles pulling through the Achilles tendon',Lo:'Body weight and the belt of watches, through the ankle'}
 ];
 let CLAIMS=BASE_CLAIMS.slice();
 function rebuildClaims(){CLAIMS=BASE_CLAIMS.concat((S&&S.custom)||[])}
 const MIDDLE={1:'Fulcrum',2:'Load',3:'Effort'};
-const CASES=['The Case of the Golden Sack','The Curious Vault Affair','The Hatch Incident','The Gilded Ladder','The Midnight Climb','The Rooftop Affair','The Lantern Lane Matter','The Marble Hall Mystery','The Brass Key Business','The Clocktower Question'];
+const CASES=['The Case of the Missing Safe','The Curious Vault Affair','The Hatch Incident','The Tangled Ladder','The Midnight Climb','The Rooftop Affair','The Lantern Lane Matter','The Marble Hall Mystery','The Brass Key Business','The Clocktower Question'];
 const SP=10; // cm between slots
 const RANKS=[[0,'Law Student'],[100,'Junior Associate'],[300,'Attorney'],[700,'Senior Counsel'],[1500,'Legendary Litigator']];
 
@@ -428,8 +428,31 @@ function fig(j){
   for(const a of j.a||[]){c.beginPath();c.moveTo(j.n[0],j.n[1]+4);c.lineTo(a[0],a[1]);c.lineTo(a[2],a[3]);c.stroke()}
   c.lineWidth=3.5;c.fillStyle='#fff';c.beginPath();c.arc(j.h[0],j.h[1],11,0,7);c.fill();c.stroke();
   c.fillStyle=INK;c.beginPath();c.arc(j.h[0]+(j.fx===undefined?4:j.fx),j.h[1]-(j.fy===undefined?2:j.fy),1.9,0,7);c.fill()}
-function gsack(x,y,r){c.fillStyle=GOLD;c.strokeStyle=GD;c.lineWidth=2.5;c.beginPath();c.arc(x,y,r,0,7);c.fill();c.stroke();c.fillStyle=GD;c.fillRect(x-r*.35,y-r-3,r*.7,5)}
-function gbar(x,y,w,h,rot){c.save();c.translate(x,y);c.rotate(rot||0);c.fillStyle=GOLD;c.strokeStyle=GD;c.lineWidth=2.5;c.fillRect(-w/2,-h/2,w,h);c.strokeRect(-w/2,-h/2,w,h);c.restore()}
+let PK='gold';
+const BIGK={tv:1,painting:1,laptop:1,safe:1,crate:1,trophy:1,vase:1,jewel:1};
+function drawItem(k,w,h){
+  c.lineWidth=2.2;c.lineJoin='round';
+  const R=(col,st,x,y,ww,hh)=>{c.fillStyle=col;c.strokeStyle=st;c.fillRect(x,y,ww,hh);c.strokeRect(x,y,ww,hh)};
+  if(k==='tv'){R('#27303f','#111827',-w/2,-h/2,w,h);R('#5aa7e8','#111827',-w/2+2.5,-h/2+2.5,w-5,h-6)}
+  else if(k==='safe'){R('#6b7280','#374151',-w/2,-h/2,w,h);c.strokeStyle='#e5e7eb';c.lineWidth=2;c.beginPath();c.arc(w*.1,0,Math.min(w,h)*.22,0,7);c.stroke()}
+  else if(k==='laptop'){R('#9ca3af','#4b5563',-w/2,h*.1,w,h*.4);R('#334155','#111827',-w*.4,-h/2,w*.8,h*.6)}
+  else if(k==='painting'){R('#92400e','#451a03',-w/2,-h/2,w,h);R('#86c5f2','#451a03',-w/2+3,-h/2+3,w-6,h-6);c.fillStyle='#fde047';c.beginPath();c.arc(w*.15,-h*.12,h*.12,0,7);c.fill();c.fillStyle='#4ade80';c.fillRect(-w/2+3,h*.15,w-6,h/2-h*.15-3)}
+  else if(k==='crate'){R('#b45309','#78350f',-w/2,-h/2,w,h);c.strokeStyle='#78350f';c.lineWidth=1.8;c.beginPath();c.moveTo(-w/2,-h/2);c.lineTo(w/2,h/2);c.moveTo(w/2,-h/2);c.lineTo(-w/2,h/2);c.stroke()}
+  else if(k==='jewel'){R('#7c3aed','#3b0764',-w/2,-h/2+h*.25,w,h*.75);c.fillStyle='#67e8f9';c.strokeStyle='#0e7490';c.lineWidth=1.5;c.beginPath();c.moveTo(0,-h/2);c.lineTo(h*.25,-h/2+h*.25);c.lineTo(0,-h/2+h*.4);c.lineTo(-h*.25,-h/2+h*.25);c.closePath();c.fill();c.stroke()}
+  else if(k==='vase'){c.fillStyle='#2a8fa0';c.strokeStyle='#134e4a';c.beginPath();c.moveTo(-w*.18,-h/2);c.lineTo(w*.18,-h/2);c.quadraticCurveTo(w*.2,-h*.3,w*.45,0);c.quadraticCurveTo(w*.45,h*.4,w*.2,h/2);c.lineTo(-w*.2,h/2);c.quadraticCurveTo(-w*.45,h*.4,-w*.45,0);c.quadraticCurveTo(-w*.2,-h*.3,-w*.18,-h/2);c.closePath();c.fill();c.stroke();c.strokeStyle='#fde68a';c.beginPath();c.moveTo(-w*.4,h*.05);c.lineTo(w*.4,h*.05);c.stroke()}
+  else if(k==='trophy'){c.fillStyle=GOLD;c.strokeStyle=GD;c.beginPath();c.moveTo(-w*.32,-h/2);c.lineTo(w*.32,-h/2);c.quadraticCurveTo(w*.3,h*.1,w*.08,h*.15);c.lineTo(w*.08,h*.35);c.lineTo(w*.3,h*.35);c.lineTo(w*.3,h/2);c.lineTo(-w*.3,h/2);c.lineTo(-w*.3,h*.35);c.lineTo(-w*.08,h*.35);c.lineTo(-w*.08,h*.15);c.quadraticCurveTo(-w*.3,h*.1,-w*.32,-h/2);c.closePath();c.fill();c.stroke()}
+  else if(k==='statue'){c.fillStyle='#b8bfca';c.strokeStyle='#4b5563';c.beginPath();c.arc(0,-h/2+w*.5,w*.5,0,7);c.fill();c.stroke();R('#b8bfca','#4b5563',-w/2,-h/2+w,w,h-w)}
+  else if(k==='crowbar'){c.lineCap='round';c.strokeStyle='#374151';c.lineWidth=Math.max(4,h)+2;c.beginPath();c.moveTo(-w/2,0);c.lineTo(w/2,0);c.quadraticCurveTo(w/2+7,0,w/2+7,8);c.stroke();c.strokeStyle='#9ca3af';c.lineWidth=Math.max(3,h);c.beginPath();c.moveTo(-w/2,0);c.lineTo(w/2,0);c.quadraticCurveTo(w/2+7,0,w/2+7,8);c.stroke()}
+  else if(k==='plates'){R('#f9fafb','#9ca3af',-w/2,-h/2,w,h)}
+  else if(k==='watches'){R('#cbd5e1','#64748b',-w/2,-h/2,w,h);c.fillStyle='#1e293b';for(const dx of[-.3,0,.3]){c.beginPath();c.arc(w*dx,0,Math.min(h*.3,3),0,7);c.fill()}}
+  else if(k==='chain'){R('#9ca3af','#4b5563',-w/2,-h/2,w,h);c.strokeStyle='#4b5563';c.lineWidth=1.4;c.setLineDash([2,2]);c.beginPath();c.moveTo(-w/2,0);c.lineTo(w/2,0);c.stroke();c.setLineDash([])}
+  else{c.fillStyle='#b08d57';c.strokeStyle='#6b4f24';c.beginPath();c.ellipse(0,0,w/2,h/2,0,0,7);c.fill();c.stroke();c.fillStyle='#6b4f24';c.fillRect(-w*.14,-h/2-3,w*.28,5)}
+}
+function gsack(x,y,r){if(PK==='gold'){c.fillStyle=GOLD;c.strokeStyle=GD;c.lineWidth=2.5;c.beginPath();c.arc(x,y,r,0,7);c.fill();c.stroke();c.fillStyle=GD;c.fillRect(x-r*.35,y-r-3,r*.7,5);return}
+  c.save();c.translate(x,y);drawItem(PK,r*2.1,r*1.9);c.restore()}
+function gbar(x,y,w,h,rot){c.save();c.translate(x,y);c.rotate(rot||0);
+  if(PK==='gold'){c.fillStyle=GOLD;c.strokeStyle=GD;c.lineWidth=2.5;c.fillRect(-w/2,-h/2,w,h);c.strokeRect(-w/2,-h/2,w,h)}
+  else drawItem(PK,PK==='statue'?Math.max(w,12):w,BIGK[PK]?Math.max(h,w*.66):h);c.restore()}
 function blk(x,y,w,h,col){c.fillStyle=col;c.fillRect(x,y,w,h);c.strokeStyle='#0004';c.lineWidth=1.5;c.strokeRect(x,y,w,h)}
 function line(x1,y1,x2,y2,col,w){c.strokeStyle=col;c.lineWidth=w||3;c.lineCap='round';c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke()}
 const stand=()=>[[-3,-26,-5,0],[3,-26,5,0]];
@@ -476,20 +499,20 @@ function kick(T){const e=wave(T,3),fx=28+12*e;blk(54,-80,7,80,'#6b4423');
   lab({F:[14,-48,34,-72],E:[8,-50,-22,-40],L:[fx+3,-44,fx+3,-18]})}
 function hipflex(T){const e=wave(T,3);blk(52,-56,6,56,'#8b8f99');
   const kx=14+6*e,ky=-52+4*e,fx=kx-4,fy=ky+26;fig(base({l:[[-2,-26,-4,0],[kx,ky,fx,fy,fx+8,fy]]}));
-  for(let i=1;i<=4;i++){c.strokeStyle=GD;c.lineWidth=2;c.fillStyle=GOLD;c.beginPath();c.arc(kx+(fx-kx)*i/4,ky+(fy-ky)*i/4,3.5,0,7);c.fill();c.stroke()}
+  for(let i=1;i<=4;i++){c.strokeStyle=PK==='gold'?GD:'#4b5563';c.lineWidth=2;c.fillStyle=PK==='gold'?GOLD:'#9ca3af';c.beginPath();c.arc(kx+(fx-kx)*i/4,ky+(fy-ky)*i/4,3.5,0,7);c.fill();c.stroke()}
   lab({F:[kx,ky,36,-70],E:[5,-50,-24,-52],L:[(kx+fx)/2,(ky+fy)/2,38,-26]})}
 function hamstring(T){const th=-1.2+1.9*wave(T,3),fx=4-24*Math.cos(th),fy=-28-24*Math.sin(th);blk(-44,-56,5,26,'#6b4423');
   fig(base({l:[[-2,-26,-4,0],[4,-28,fx,fy,fx-7,fy]]}));gbar(fx,fy,9,6);
   lab({F:[4,-28,28,-38],E:[0,-36,-22,-68],L:[fx,fy,fx-14,fy+26]})}
 function dorsi(T){const e=wave(T,3),tx=18,ty=-8-12*e;
-  fig(base({l:[[-3,-26,-5,0],[3,-26,5,-8,tx,ty]]}));blk(tx-6,ty-16,20,14,'#7a5a3a');line(tx-6,ty-9,tx+14,ty-9,GOLD,3);
+  fig(base({l:[[-3,-26,-5,0],[3,-26,5,-8,tx,ty]]}));blk(tx-6,ty-16,20,14,'#7a5a3a');line(tx-6,ty-9,tx+14,ty-9,'#9ca3af',3);
   lab({F:[5,-8,-26,-8],E:[4,-18,30,-56],L:[tx,ty,48,-4]})}
 function over(T,v){const w=wave(T,2.2),psi=1.57+.85*w,ex=6,ey=-106,hx=ex+24*Math.cos(psi),hy=ey-24*Math.sin(psi);
   if(v==='hatch'){blk(-14,hy-14,44,6,'#6b4423');gbar(-2,hy-21,16,7);gbar(14,hy-21,16,7)}else{blk(58,-60,5,60,'#8b8f99');gbar(hx+3,hy-4,26,7)}
   fig(base({a:[[ex,ey,hx,hy],[-3,-66,-4,-46]]}));lab({F:[6,-106,-28,-108],E:[3,-98,-28,-130],L:[hx,hy,hx+32,hy+14]})}
 function wings(T){const s=Math.sin(T*3)*2;gsack(-54,-76+s,9);gsack(54,-76+s,9);
   fig(base({a:[[-26,-88+s,-48,-86+s],[26,-88+s,48,-86+s]]}));lab({F:[26,-88+s,24,-112],E:[34,-88+s,46,-112],L:[54,-76+s,54,-52]})}
-function jaw(T){line(30,-93,30,-80,GD,2);gsack(30,-72,8);gbar(21,-93,18,6);fig(base({fx:5,fy:-3}));
+function jaw(T){if(PK==='crowbar')gbar(26,-92,34,5);else{line(30,-93,30,-80,GD,2);gsack(30,-72,8);gbar(21,-93,18,6)}fig(base({fx:5,fy:-3}));
   lab({F:[-2,-97,-28,-106],E:[2,-93,-28,-84],L:[21,-93,46,-104]})}
 function oneleg(T){blk(-14,0,20,5,'#6b4423');gsack(-14,-74,12);
   fig(base({l:[[-1,-26,-2,0,6,0],[16,-44,10,-22,17,-22]],a:[[-16,-80,-32,-72],[16,-80,32,-72]]}));
@@ -506,6 +529,7 @@ function drawBubble(T){
   // tail dots
   c.fillStyle='#8f98ab';circ(880,369,8);c.fill();circ(881,378,5.5);c.fill();
   c.fillStyle='#fff';circ(880,369,6.5);c.fill();circ(881,378,4);c.fill();
+  PK=(G.claim&&G.claim.prop)||'bag';
   c.translate(cx,cy);c.scale(.7+.3*e,.7+.3*e);
   for(const pass of[0,1]){c.fillStyle=pass?'#fff':'#8f98ab';const g=pass?0:3;
     for(let i=0;i<14;i++){const a=i/14*Math.PI*2;c.beginPath();c.arc(Math.cos(a)*rx,Math.sin(a)*ry,24+g,0,7);c.fill()}
@@ -678,6 +702,7 @@ function refreshArrange(pre){
   if(G.hint>=2)info+='<br>💡 <b>Memory aid:</b> 1-2-3 = F-L-E in the middle. Here, the <b>'+MIDDLE[G.claim.cls]+'</b> goes in the middle slot.';
   const acts=[{t:all?'⚖ Present to the jury':'Place all 3 tokens…',c:'primary',dis:!all,f:present}];
   if(G.hint<2)acts.push({t:'💡 Hint (−'+(G.hint?15:8)+' rep)',f:()=>{if(S.rep<(G.hint?15:8)&&false)return;addRep(-(G.hint?15:8));floater('−'+(G.hint?15:8),'#ffb3b3');G.hint++;refreshArrange()}});
+  if(G.hint>=1&&ANATOF[G.claim.id])acts.push({t:'🔍 Anatomy diagram',f:()=>openAnatomy(ANATOF[G.claim.id],true)});
   acts.push({t:'↺ Clear',f:()=>{resetTokens();refreshArrange()}});
   ui('Prosecutor',(pre||'')+'“'+G.claim.say+'”',info,acts);
 }
@@ -816,6 +841,7 @@ function openMenu(){
   if(inTrial)m.appendChild(btn('▶ Resume trial','primary',closeModal));
   m.appendChild(btn(inTrial?'↺ Restart this trial':'▶ Start Trial '+S.level,inTrial?'':'primary',()=>startTrial(inTrial?G.opts:null)));
   m.appendChild(btn('📚 Review the basics (levers)','',()=>openReview(false)));
+  m.appendChild(btn('🔍 Anatomy: where is the effort?','',()=>openReview(false,null,'Where is the effort')));
   m.appendChild(btn('🎨 Customize lawyer & shop','',()=>openCustomize(false)));
   m.appendChild(btn('📁 Case file (progress)','',openStats));
   m.appendChild(btn('💾 Save / transfer my character','',openSave));
@@ -1079,7 +1105,7 @@ function bindQuiz(root){
       qf.innerHTML='<div class="call">'+(right?'✔ Correct! ':'✘ Not quite. ')+q.w+'</div>';
       const nb=btn(k+1<Q.length?'Next question ▶':'See score','primary',()=>{k++;draw()});qf.appendChild(nb)});qo.appendChild(b)})}
   draw()}
-function openReview(first,after){
+function openReview(first,after,startTitle){
   let i=0;const card=openModal('<div id="rvh"></div><div id="rvb"></div><div class="row" id="rvn"></div>');
   const hd=card.querySelector('#rvh'),bd=card.querySelector('#rvb'),nv=card.querySelector('#rvn');
   function show(n){i=clamp(n,0,RV.length-1);const p=RV[i];
@@ -1089,7 +1115,7 @@ function openReview(first,after){
     if(i<RV.length-1)nv.appendChild(btn('Next ▶','primary',()=>show(i+1)));
     else nv.appendChild(btn(after?'▶ Restart my trial':first?'▶ Start Trial 1':'Done','primary',()=>{if(after)after();else if(first)startTrial();else{closeModal();openMenu()}}));
     nv.appendChild(btn(after?'Skip: restart trial':first&&i===0?'Skip review':'✕ Close','',()=>{if(after)after();else{closeModal();openMenu()}}))}
-  show(0)}
+  show(startTitle?Math.max(0,RV.findIndex(p=>p.t.startsWith(startTitle))):0)}
 
 /* ================= save / transfer character ================= */
 function makeSave(){const o=Object.assign({},S);delete o.exLevel;const j=JSON.stringify(o);return 'LLS1.'+b64e(j)+'.'+chk(j)}
@@ -1189,10 +1215,10 @@ const ANAT={
   svg:()=>aSvg(aBone(34,98,112,100,13)+aJ(116,98,11)+aBone(124,134,258,134,16)+aBone(262,134,334,134,12)+aJ(120,134,20)+aHand(332,122,36,24)+aMus('M44,104 C62,86 112,84 132,98 L178,124 L170,130 C140,120 96,120 58,114 Z')+aTen('M158,118 L176,126',6)+arr(176,124,84,EC)+aIns(176,126)+aSack(350,108,11)+arr(350,62,92,LC)+aBdg(350,50,'L',LC)+aBdg(176,72,'E',EC)+aF(120,136)+aCall(100,92,134,44,['Deltoid'],MUS_S)+aCall(178,138,216,192,['INSERTION:','deltoid tuberosity','of the humerus'],'#8a4b00')+aCall(120,152,88,204,['Fulcrum:','shoulder','joint'],FC)+aCall(350,150,330,252,['Load'],'#8a6410'))}};
 const ANATKEYS=['biceps','triceps','ankle','knee','neck','shoulder'];
 const ANATOF={tiptoe:'ankle',museum:'ankle',stairs:'ankle',skip:'ankle',sprint:'ankle',pushoff:'ankle',biceps:'biceps',rope:'biceps',triceps:'triceps',throw:'triceps',knee:'knee',neck:'neck',headbal:'neck',shoulder:'shoulder'};
-function anatHTML(k){const a=ANAT[k];const sw=(c,s,t)=>'<span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:'+c+';border:2px solid '+s+';vertical-align:-1px;margin:0 3px 0 8px"></span>'+t;
+function anatHTML(k,hide){const a=ANAT[k];const sw=(c,s,t)=>'<span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:'+c+';border:2px solid '+s+';vertical-align:-1px;margin:0 3px 0 8px"></span>'+t;
   return a.svg()+'<div class="fig">Simplified diagram, not to scale.'+sw(BONE,BONE_S,'bone')+sw(MUS,MUS_S,'muscle')+sw(TEN,TEN_S,'tendon')+sw(HL,HL_S,'insertion = where the effort acts')+'</div>'+
-  '<table class="st mt"><tr><td><b>Lever class</b></td><td>'+tag(['','F','L','E'][a.cls],['','Fulcrum','Load','Effort'][a.cls]+' in the middle')+' → <b>'+ord[a.cls]+' class</b></td></tr><tr><td><b>Muscle</b></td><td>'+a.muscle+'</td></tr><tr><td><b>Origin</b></td><td>'+a.origin+'</td></tr><tr><td><b>Insertion (effort)</b></td><td><b>'+a.ins+'</b></td></tr><tr><td>'+tag('F','Fulcrum')+'</td><td>'+a.F+'</td></tr><tr><td>'+tag('L','Load')+'</td><td>'+a.L+'</td></tr><tr><td><b>Arms</b></td><td>'+a.arms+'</td></tr></table>'}
-function openAnatomy(k){const card=openModal('<h2>🔍 '+ANAT[k].t+'</h2>'+anatHTML(k)+'<div class="row"></div>');card.querySelector('.row').appendChild(btn('Close','primary',closeModal))}
+  '<table class="st mt">'+(hide?'':'<tr><td><b>Lever class</b></td><td>'+tag(['','F','L','E'][a.cls],['','Fulcrum','Load','Effort'][a.cls]+' in the middle')+' → <b>'+ord[a.cls]+' class</b></td></tr>')+'<tr><td><b>Muscle</b></td><td>'+a.muscle+'</td></tr><tr><td><b>Origin</b></td><td>'+a.origin+'</td></tr><tr><td><b>Insertion (effort)</b></td><td><b>'+a.ins+'</b></td></tr><tr><td>'+tag('F','Fulcrum')+'</td><td>'+a.F+'</td></tr><tr><td>'+tag('L','Load')+'</td><td>'+a.L+'</td></tr>'+(hide?'':'<tr><td><b>Arms</b></td><td>'+a.arms+'</td></tr>')+'</table>'}
+function openAnatomy(k,hide){const card=openModal('<h2>🔍 '+ANAT[k].t+'</h2>'+anatHTML(k,hide)+'<div class="row"></div>');card.querySelector('.row').appendChild(btn('Close','primary',closeModal))}
 /* ================= boot ================= */
 function boot(){
   load();hud();newCast();
